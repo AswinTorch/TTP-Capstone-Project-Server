@@ -3,17 +3,28 @@ var express = require("express");
 var path = require("path");
 var cookieParser = require("cookie-parser");
 var logger = require("morgan");
-
 var indexRouter = require("./routes/index");
+const { env } = require("process");
 var app = express();
-
+require("dotenv").config();
 app.use(logger("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
-
 app.use("/api", indexRouter);
+//This is just a test
+// var trans = db.runTransaction(i => {
+//   return i.get(course_ref).then(doc => {
+//     i.update(course_ref);
+//   }).then(res => {
+//     console.log("Added:dummy data")
+//   }).catch(err => {
+//     console.log(`${err} :failed`);
+//   })
+// })
+
+
 //// error handling
 app.use((req, res, next) => {
   if (path.extname(req.path).length) {
