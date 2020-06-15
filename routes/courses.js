@@ -32,7 +32,7 @@ router.get("/", async (req, res, next) => {
   }
 });
 //id:: GEt data by id number
-router.get("/:id", async (req, res, next) => {
+router.get("/id/:id", async (req, res, next) => {
   const { id } = req.params;
   try {
     var return_value = await db
@@ -56,30 +56,54 @@ router.get("/:id", async (req, res, next) => {
     next(err);
   }
 });
-//Deparment
-//will send the departments available
-// router.get("/:allDpt", async (req, res, next) => {
-//   try {
-//     var return_val = await db.collection("Courses").get().then((snapShot) => {
-//       var return_item = Set();
-//       snapShot.forEach((doc) => {
-//         var curr_data = doc.data();
-//         console.log(typeOf(curr_data));
-//         // if (return_item.has(curr.Department)) {
-//         //   console.log("in");
-//         // } else {
-//         //   return_item.add(doc.data().Department);
-//         // }
-//       });
-//       return return_item;
-//     }).catch(err => {
-//       console.log("Error on retrival::", err)
-//     });
-//     res.status(200).json(return_val)
-//   } catch (err) {
-//     next(err);
-//   }
-// });
+// Deparment
+// will send the list of all the departments available within the courses
+router.get("/allDpt/", async (req, res, next) => {
+  const { id } = req.params;
+  try {
+    var return_val = await db.collection("Courses").get().then((snapShot) => {
+      var return_item = new Set();
+      snapShot.forEach((doc) => {
+        var curr_data = doc.data();
+        console.log(typeof(curr_data.Department));
+        if (return_item.has(curr_data.Department)) {
+          console.log("in");
+        } else {
+          return_item.add(curr_data.Department);
+        }
+      });
+      console.log(return_item)
+      return [...return_item];
+    }).catch(err => {
+      console.log("Error on retrival::", err)
+    });
+    res.status(200).json(return_val)
+  } catch (err) {
+    next(err);
+  }
+});
+router.get("/allDpt/:dptName", async (req, res, next) => {
+  const {dptName} = req.params;
+  try {
+    var return_val = await db.collection("Courses").get().then(snapShot => {
+      var return_item = [];
+      snapShot.forEach((doc) => {
+        var curr_data = doc.data();
+        if (dptName === curr_data.Department) {
+          return_item.push(curr_data)
+        } else {
+          console.log("nah")
+        }
+      })
+      return return_item
+    }).catch(err => {
+      console.log("Could retrive the val ", err)
+    });
+    res.status(200).json(return_val);
+  } catch (err) {
+    next(err);
+  }
+});
 
 
 module.exports = router;
