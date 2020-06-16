@@ -15,28 +15,27 @@ var db = require("./db");
  * 200 - OK
  * 404 - Not found
  */
-router.get("/id/:id", async (req, res, next) => {
-  const { id } = req.params;
+router.get("/id/:id", async (req, res, next) => 
+{
+    const { id } = req.params;
 
-  try {
-    var return_val = await db
-      .collection("Students")
-      .doc(id)
-      .get()
-      .then((doc) => {
-        if (!doc.exists) {
-          console.log("No such element");
-          res.status(404).send("error");
-        } else {
-          res.status(200).send(doc.data())
-        }
-      })
-      .catch((err) => {
-        res.status(err)
-      });
-  } catch (err) {
-    res.status(404).send(`${err} :: Error getting a student`);
-  }
+    try 
+    {
+        var return_val = await db
+        .collection("Students")
+        .doc(id)
+        .get()
+        .then((doc) => 
+        {
+            if (!doc.exists) res.status(404).send("Error getting a student. Is the ID correct?");
+            else res.status(200).send(doc.data());
+        })
+        .catch((err) => console.error(err));
+    } 
+    catch(err) 
+    {
+        res.status(404).send(`${err} :: Error getting a student`);
+    }
 });
 
 /**
@@ -64,35 +63,34 @@ router.get("/id/:id", async (req, res, next) => {
  * 201 - Created
  * 400 - Bad Request
  */
-router.post("/", async (req, res) => {
-  const { uid, firstName, lastName, email } = req.body;
+router.post("/", async (req, res) => 
+{
+    const { uid, firstName, lastName, email } = req.body;
 
-  try {
-    let return_id = await db
-      .collection("Students")
-      .add({
-        uid: uid,
-        first_name: firstName,
-        last_name: lastName,
-        email: email,
-        total_credit: 0,
-        total_received: 0,
-        total_owed: 0,
-        enrolled_classes: [],
-      })
-      .then((ref) => {
-        return ref.id;
-      })
-      .catch((err) => console.error(err));
+    try 
+    {
+        let return_id = await db
+        .collection("Students")
+        .add(
+        {
+            uid: uid,
+            first_name: firstName,
+            last_name: lastName,
+            email: email,
+            total_credit: 0,
+            total_received: 0,
+            total_owed: 0,
+            enrolled_classes: [],
+        })
+        .then((ref) => { return ref.id; })
+        .catch((err) => console.error(err));
 
-    res.status(201).send(return_id);
-  } catch (err) {
-    res
-      .status(400)
-      .send(
-        `${err} :: Error posting a new student. Be sure to include a uid, first_name, last_name, and email.`
-      );
-  }
+        res.status(201).send(return_id);
+    } 
+    catch (err) 
+    {
+        res.status(400).send(`${err} :: Error posting a new student. Be sure to include a uid, first_name, last_name, and email.`);
+    }
 });
 
 //insert classes enrolled
