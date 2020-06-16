@@ -44,16 +44,20 @@ router.get("/id/:id", async (req, res, next) =>
  * POST new student
  * /api/students/
  * 
+ * Creates a new student object using the following information from the request body:
+ * - uid
+ * - displayName: first and last name
+ * - email
+ * And the default values:
+ * - total_credit: 0
+ * - total_received: 0
+ * - total_owed: 0
+ * - enrolled_classes: []
+ * 
  * Upon sign in, Firebase Authentication will generate a random uid for the new user.
  * After sign in, the signed-in user can be accessed by using the currentUser property:
  * 
  * let user = firebase.auth().currentUser;
- * 
- * The user's profile can have these properties:
- * - displayName
- * - email
- * - photoURL
- * - uid
  * 
  * Returns: the newly created UUID
  * 
@@ -75,8 +79,8 @@ router.post("/", async (req, res) =>
             last_name: lastName,
             email: email,
             total_credit: 0,
-            total_owed: 0,
             total_received: 0,
+            total_owed: 0,
             enrolled_classes: [],
         })
         .then((ref) => { return ref.id; })
