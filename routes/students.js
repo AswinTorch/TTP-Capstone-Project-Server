@@ -84,35 +84,6 @@ router.post("/", async (req, res) =>
     }
 });
 
-//Checks if the student exists on the database or not and return [false] if not found | [[true,Student.id]] if found.
-router.get("/exists/:uid_o", async (req, res, next) => {
-  // try to get students object from database
-  const { uid_o } = req.params;
-  // console.log(name, email);
-  try {
-    var return_bool = await db
-      .collection("Students")
-      .where("uid", "==", uid_o)
-      .get()
-      .then((snapShot) => {
-        var return_val = [];
-        if (snapShot.empty) {
-          return_val.push(false);
-        } else {
-          snapShot.forEach((doc) => {
-            return_val.push([true, doc.id]);
-          });
-        }
-        return return_val;
-      })
-      .catch((err) => {
-        console.log("Error on retrieval", err);
-      });
-    res.status(200).send(return_bool);
-  } catch (err) {
-    next(err);
-  }
-});
 //insert classes enrolled
 //takes in the student id as parameter
 //& course_id as json object
