@@ -60,11 +60,11 @@ router.get("/allDpt/", async (req, res, next) => {
       var return_item = new Set();
       snapShot.forEach((doc) => {
         var curr_data = doc.data();
-        console.log(typeof(curr_data.Department));
-        if (return_item.has(curr_data.Department)) {
+        console.log(typeof(curr_data.department));
+        if (return_item.has(curr_data.department)) {
           console.log("in");
         } else {
-          return_item.add(curr_data.Department);
+          return_item.add(curr_data.department);
         }
       });
       console.log(return_item)
@@ -84,7 +84,7 @@ router.get("/allDpt/:dptName", async (req, res, next) => {
       var return_item = [];
       snapShot.forEach((doc) => {
         var curr_data = doc.data();
-        if (dptName === curr_data.Department) {
+        if (dptName === curr_data.department) {
           return_item.push(curr_data)
         } else {
           console.log("nah")
