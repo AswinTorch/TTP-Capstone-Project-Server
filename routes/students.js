@@ -90,7 +90,7 @@ router.post("/", async (req, res) =>
     } 
     catch(err) 
     {
-        res.status(400).send(`${err} :: Couldn't post new student for some reason`);
+        res.status(400).send(`${err} :: Error posting a new student. Be sure to include a uid, first_name, last_name, and email.`);
     }
 });
 
