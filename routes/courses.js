@@ -3,22 +3,33 @@ var router = express.Router();
 var firebase = require("firebase");
 var db = require("./db");
 
-router.get("/", async (req, res, next) => {
+router.get("/:limit", async (req, res, next) => {
+  const { limit } = req.params;
+  // const ind
   try {
-    var return_value = await db
+    var collect = await db
       .collection("Courses")
+      .orderBy("department", "asc")
+      .limit(parseInt(limit));
+
+    var return_value = await collect
       .get()
       .then(function (snapShot) {
-        var return_list = {};
+        var return_list = [];
         snapShot.forEach((doc) => {
-          return_list[doc.id] = doc.data();
-          
+          var current_campus = doc.data();
+          current_campus["id"] = doc.id;
+          return_list.push(current_campus);
         });
         return return_list;
       })
       .catch(function (err) {
         console.log("Error on retrival :: ", err);
       });
+    var final_object = {
+      total_count: limit,
+    };
+    return_value = { data: return_value, pagination: final_object };
 
     res.status(200).send(return_value);
   } catch (err) {
@@ -27,7 +38,7 @@ router.get("/", async (req, res, next) => {
   }
 });
 //id:: GEt data by id number
-router.get("/id/:id", async (req, res, next) => {
+router.get("/:id", async (req, res, next) => {
   const { id } = req.params;
   try {
     var return_value = await db
@@ -53,53 +64,59 @@ router.get("/id/:id", async (req, res, next) => {
 });
 // Deparment
 // will send the list of all the departments available within the courses
-router.get("/allDpt/", async (req, res, next) => {
+router.get("/allDepartment/", async (req, res, next) => {
   const { id } = req.params;
   try {
-    var return_val = await db.collection("Courses").get().then((snapShot) => {
-      var return_item = new Set();
-      snapShot.forEach((doc) => {
-        var curr_data = doc.data();
-        console.log(typeof(curr_data.department));
-        if (return_item.has(curr_data.department)) {
-          console.log("in");
-        } else {
-          return_item.add(curr_data.department);
-        }
+    var return_val = await db
+      .collection("Courses")
+      .get()
+      .then((snapShot) => {
+        var return_item = new Set();
+        snapShot.forEach((doc) => {
+          var curr_data = doc.data();
+          console.log(typeof curr_data.department);
+          if (return_item.has(curr_data.department)) {
+            console.log("in");
+          } else {
+            return_item.add(curr_data.department);
+          }
+        });
+        console.log(return_item);
+        return [...return_item];
+      })
+      .catch((err) => {
+        console.log("Error on retrival::", err);
       });
-      console.log(return_item)
-      return [...return_item];
-    }).catch(err => {
-      console.log("Error on retrival::", err)
-    });
-    res.status(200).json(return_val)
+    res.status(200).json(return_val);
   } catch (err) {
     next(err);
   }
 });
-router.get("/allDpt/:dptName", async (req, res, next) => {
-  const {dptName} = req.params;
+router.get("/allDepartment/:dptName", async (req, res, next) => {
+  const { dptName } = req.params;
   try {
-    var return_val = await db.collection("Courses").get().then(snapShot => {
-      var return_item = [];
-      snapShot.forEach((doc) => {
-        var curr_data = doc.data();
-        if (dptName === curr_data.department) {
-          return_item.push(curr_data)
-        } else {
-          console.log("nah")
-        }
+    var return_val = await db
+      .collection("Courses")
+      .get()
+      .then((snapShot) => {
+        var return_item = [];
+        snapShot.forEach((doc) => {
+          var curr_data = doc.data();
+          if (dptName === curr_data.department) {
+            return_item.push(curr_data);
+          } else {
+            console.log("nah");
+          }
+        });
+        return return_item;
       })
-      return return_item
-    }).catch(err => {
-      console.log("Could retrive the val ", err)
-    });
+      .catch((err) => {
+        console.log("Could retrive the val ", err);
+      });
     res.status(200).json(return_val);
   } catch (err) {
     next(err);
   }
 });
 
-
 module.exports = router;
-

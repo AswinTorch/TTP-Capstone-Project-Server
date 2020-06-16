@@ -38,6 +38,7 @@ router.post("/", async (req, res) => {
         first_name: firstName,
         last_name: lastName,
         email: emailAddress,
+        total_credit:0,
         total_owed: 0,
         total_received: 0,
         enrolled_classes: [],
@@ -117,6 +118,7 @@ router.put("/removeCourse/:id", async (req, res, next) => {
 //prev course id and the the new id
 router.put("/swapCourse/:id", async (req, res, next) => {
   const { id } = req.params;
+  //
   const { prev_course_id, new_course_id } = req.body;
   try {
     var current_student = await db.collection("Students").doc(id);
