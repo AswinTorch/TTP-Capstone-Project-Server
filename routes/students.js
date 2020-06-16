@@ -3,35 +3,46 @@ var router = express.Router();
 var firebase = require("firebase");
 var db = require("./db");
 
-router.get("/id/:id", async (req, res, next) => {
-  const { id } = req.params;
-  try {
-    var return_val = await db
-      .collection("Students")
-      .doc(id)
-      .get()
-      .then((doc) => {
-        if (doc.exists) {
-          return doc.data();
-        } else {
-          console.log("no such data found");
-        }
-      })
-      .catch((err) => {
-        console.log("no such data found on db");
-      });
-    res.status(200).json(return_val);
-  } catch (err) {
-    next(err);
-  }
+/**
+ * GET student object from their id
+ * /api/students/id/:id
+ * 
+ * /api/students/id/10 would return the student object with id 10, if it exists
+ * 
+ * Return status:
+ * 200 - OK
+ * 404 - Not found
+ */
+router.get("/id/:id", async (req, res, next) => 
+{
+    const { id } = req.params;
+
+    try 
+    {
+        var return_val = await db.collection("Students")
+        .doc(id)
+        .get()
+        .then((doc) => {
+            if (doc.exists) {
+            return doc.data();
+            } else {
+            console.log("no such data found");
+            }
+        })
+        .catch((err) => {
+            console.log("no such data found on db");
+        });
+        res.status(200).json(return_val);
+    } 
+    catch (err) 
+    {
+        next(err);
+    }
 });
 
 /**
  * POST new student
-<<<<<<< HEAD
  * /api/students/
-=======
->>>>>>> 824acca5760d80784555e0a0fc376510886d0147
  * 
  * Upon sign in, Firebase Authentication will generate a random uid for the new user.
  * After sign in, the signed-in user can be accessed by using the currentUser property:
@@ -63,10 +74,8 @@ router.post("/", async (req, res) =>
             enrolledClasses: [],
         })
         .then((ref) => { return ref.id; })
-        .catch((err) => 
-        { 
-            console.log("Couldn't post for some odd reason");
-        });
+        .catch((err) => console.error(err));
+
         res.status(201).send(return_id);
     } 
     catch(err) 
