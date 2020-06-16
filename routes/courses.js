@@ -2,11 +2,6 @@ var express = require("express");
 var router = express.Router();
 var firebase = require("firebase");
 var db = require("./db");
-console.log("this is ", db);
-
-// var set_course = course_ref.set(dummy);
-/* GET all courses. */
-// /api/courses
 
 router.get("/", async (req, res, next) => {
   try {
