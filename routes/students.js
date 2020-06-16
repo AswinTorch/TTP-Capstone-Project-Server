@@ -28,6 +28,7 @@ router.get("/id/:id", async (req, res, next) => {
 
 /**
  * POST new student
+ * /api/students/
  * 
  * Upon sign in, Firebase Authentication will generate a random uid for the new user.
  * After sign in, the signed-in user can be accessed by using the currentUser property:
@@ -40,33 +41,35 @@ router.get("/id/:id", async (req, res, next) => {
  * - photoURL
  * - uid
  */
-router.post("/", async (req, res) => {
-  const { UID, firstName, lastName, emailAddress } = req.body;
-  console.log(UID, firstName);
-  try {
-    console.log(req.body["uid"]);
-    let return_id = await db
-      .collection("Students")
-      .add({
-        uid: UID,
-        first_name: firstName,
-        last_name: lastName,
-        email: emailAddress,
-        total_credit:0,
-        total_owed: 0,
-        total_received: 0,
-        enrolled_classes: [],
-      })
-      .then((ref) => {
-        return ref.id;
-      })
-      .catch((err) => {
-        console.log("Couldn't post for some odd reason");
-      });
-    res.status(201).send(return_id);
-  } catch (err) {
-    res.status(400).send(`${err} :::Couldn't add for some ungodly reason`);
-  }
+router.post("/", async (req, res) => 
+{
+    const { uid, firstName, lastName, email } = req.body;
+
+    try 
+    {
+        let return_id = await db.collection("Students")
+        .add(
+        {
+            uid: uid,
+            firstName: firstName,
+            lastName: lastName,
+            email: email,
+            totalCredit: 0,
+            totalOwed: 0,
+            totalReceived: 0,
+            enrolledClasses: [],
+        })
+        .then((ref) => { return ref.id; })
+        .catch((err) => 
+        { 
+            console.log("Couldn't post for some odd reason");
+        });
+        res.status(201).send(return_id);
+    } 
+    catch(err) 
+    {
+        res.status(400).send(`${err} :::Couldn't add for some ungodly reason`);
+    }
 });
 
 //Checks if the student exists on the database or not and return [false] if not found | [[true,Student.id]] if found.
