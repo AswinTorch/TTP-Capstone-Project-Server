@@ -54,6 +54,12 @@ router.get("/id/:id", async (req, res, next) =>
  * - email
  * - photoURL
  * - uid
+ * 
+ * Returns: the newly created UUID
+ * 
+ * Return status:
+ * 201 - Created
+ * 400 - Bad Request
  */
 router.post("/", async (req, res) => 
 {
@@ -80,7 +86,7 @@ router.post("/", async (req, res) =>
     } 
     catch(err) 
     {
-        res.status(400).send(`${err} :::Couldn't add for some ungodly reason`);
+        res.status(400).send(`${err} :: Couldn't post new student for some reason`);
     }
 });
 
