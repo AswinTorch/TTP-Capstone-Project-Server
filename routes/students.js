@@ -72,7 +72,8 @@ router.post("/", async (req, res) =>
         // Creates a new student object and returns the uid
         let return_id = await db
         .collection("Students")
-        .add(
+        .doc(uid)
+        .set(
         {
             uid: uid,
             first_name: firstName,
