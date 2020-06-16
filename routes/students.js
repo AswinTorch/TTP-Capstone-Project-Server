@@ -28,7 +28,10 @@ router.get("/id/:id", async (req, res, next) => {
 
 /**
  * POST new student
+<<<<<<< HEAD
  * /api/students/
+=======
+>>>>>>> 824acca5760d80784555e0a0fc376510886d0147
  * 
  * Upon sign in, Firebase Authentication will generate a random uid for the new user.
  * After sign in, the signed-in user can be accessed by using the currentUser property:
