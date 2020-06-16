@@ -139,7 +139,4 @@ router.put("/swapCourse/:id", async (req, res, next) => {
   }
 });
 
-async function get_course() {
-  return;
-}
 module.exports = router;
