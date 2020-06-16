@@ -25,7 +25,21 @@ router.get("/id/:id", async (req, res, next) => {
     next(err);
   }
 });
-//POST ON EVERY
+
+/**
+ * POST new student
+ * 
+ * Upon sign in, Firebase Authentication will generate a random uid for the new user.
+ * After sign in, the signed-in user can be accessed by using the currentUser property:
+ * 
+ * let user = firebase.auth().currentUser;
+ * 
+ * The user's profile can have these properties:
+ * - displayName
+ * - email
+ * - photoURL
+ * - uid
+ */
 router.post("/", async (req, res) => {
   const { UID, firstName, lastName, emailAddress } = req.body;
   console.log(UID, firstName);
@@ -53,6 +67,7 @@ router.post("/", async (req, res) => {
     res.status(400).send(`${err} :::Couldn't add for some ungodly reason`);
   }
 });
+
 //Checks if the student exists on the database or not and return [false] if not found | [[true,Student.id]] if found.
 router.get("/exists/:uid_o", async (req, res, next) => {
   // try to get students object from database
