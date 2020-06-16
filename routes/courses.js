@@ -3,8 +3,8 @@ var router = express.Router();
 var firebase = require("firebase");
 var db = require("./db");
 
-router.get("/:limit", async (req, res, next) => {
-  const { limit } = req.params;
+router.get("/", async (req, res, next) => {
+  const { limit } = req.query;
   // const ind
   try {
     var collect = await db
@@ -65,7 +65,6 @@ router.get("/id/:id", async (req, res, next) => {
 // Deparment
 // will send the list of all the departments available within the courses
 router.get("/allDepartment/", async (req, res, next) => {
-  const { id } = req.params;
   try {
     var return_val = await db
       .collection("Courses")
