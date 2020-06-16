@@ -65,13 +65,13 @@ router.post("/", async (req, res) =>
         .add(
         {
             uid: uid,
-            firstName: firstName,
-            lastName: lastName,
+            first_name: firstName,
+            last_name: lastName,
             email: email,
-            totalCredit: 0,
-            totalOwed: 0,
-            totalReceived: 0,
-            enrolledClasses: [],
+            total_credit: 0,
+            total_owed: 0,
+            total_received: 0,
+            enrolled_classes: [],
         })
         .then((ref) => { return ref.id; })
         .catch((err) => console.error(err));
