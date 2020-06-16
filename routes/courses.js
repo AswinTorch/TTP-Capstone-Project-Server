@@ -38,7 +38,7 @@ router.get("/:limit", async (req, res, next) => {
   }
 });
 //id:: GEt data by id number
-router.get("/:id", async (req, res, next) => {
+router.get("/id/:id", async (req, res, next) => {
   const { id } = req.params;
   try {
     var return_value = await db
