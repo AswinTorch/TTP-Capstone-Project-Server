@@ -1,5 +1,7 @@
-# Endpoints that can be used in for api calls.
-<br>`/courses`
+# Endpoints that can be used for CRUD operations.
+----------------------------------
+## Courses
+`/courses`
      
      Gives all the json object all the courses with id as key and an object with course information 
      Example:
@@ -75,4 +77,81 @@
     }
     ]
 
+--------------------------------
+## Students
+`/id/:id`
+    
+    GET Operation
+    =============
+    Returns the student object based on the given parameter(id)
+    For example:
+        for: localhost:3000/api/students/id/uSkp7UQcc1dVpfrNMu7z 
+        --------------------------------------------------------
+        {
+        "enrolled_classes": [
+            "P92muHq2SVlqzs5wHx6Y"
+        ],
+        "email": "oksy@kk.com",
+        "first_name": "John",
+        "total_owed": 0,
+        "uid": "2000000",
+        "total_received": 0,
+        "last_name": "Okay"
+        }
+`/`
+    
+    POST Operation
+    =============
+    input_obj ={
+        UID: unique_id_on_google_auth,
+        firstName: Pretty selfexplanatory,
+        lastName: Pretty selfexplanatory,
+        emailAddress: Pretty selfexplanatory,
+    }
+    Returns the id of new doc create for student 
+    For example:
+        for: localhost:3000/
+        req.body->{
+            "UID": 20000001,
+            "firstName": "Hos",
+            "lastName": "Du",
+            "emailAddress": "selfexplanatory@pretty.com"
+        }
+        --------------------------------------------------------
+        RESULT -> 25znrP0KfFwlFIpLpomK (THE ID OF NEW STUDENT DOC)
+`/addCourse/:id`
+    
+    PUT Operation
+    =============
+    Takes in input_obj={
+        CourseID : ID_OF_COURSE
+    }
+    param: id_of_student
+    return nothing except 201 and a sucess msg.
+`/addCourse/:id`
+    
+    PUT Operation
+    =============
+    Takes in input_obj={
+        CourseID : ID_OF_COURSE
+    }
+    param: id_of_student
+    return nothing except 201 and a sucess msg.
 
+`/exists/:uid`
+    
+    
+    GET Operation
+    =============
+    This is to check if the account exists during login or not
+    returns false in not found and returns [true, students_id] if found
+    For example:
+        localhost:3000/api/students/exists/20000000
+        -> Returns [false]
+        localhost:3000/api/students/exists/"20s2"
+        -> Returns [
+                    [
+                        true,
+                        "uSkp7UQcc1dVpfrNMu7z"
+                    ]
+                ]

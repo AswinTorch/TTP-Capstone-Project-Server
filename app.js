@@ -5,10 +5,13 @@ var cookieParser = require("cookie-parser");
 var logger = require("morgan");
 var indexRouter = require("./routes/index");
 const { env } = require("process");
+const helmet = require("helmet");
+
 var app = express();
 require("dotenv").config();
+app.use(helmet())
 app.use(logger("dev"));
-app.use(express.json());
+app.use(express.json({type:"*/*"}));
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
