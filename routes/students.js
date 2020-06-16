@@ -9,6 +9,8 @@ var db = require("./db");
  * 
  * /api/students/id/10 would return the student object with id 10, if it exists
  * 
+ * Returns: the student object associated with the id
+ * 
  * Return status:
  * 200 - OK
  * 404 - Not found
@@ -20,23 +22,15 @@ router.get("/id/:id", async (req, res, next) =>
     try 
     {
         var return_val = await db.collection("Students")
-        .doc(id)
-        .get()
-        .then((doc) => {
-            if (doc.exists) {
-            return doc.data();
-            } else {
-            console.log("no such data found");
-            }
-        })
-        .catch((err) => {
-            console.log("no such data found on db");
-        });
+        .doc(id).get()
+        .then((doc) => { return doc.data(); })
+        .catch((err) => console.error(err));
+
         res.status(200).json(return_val);
     } 
-    catch (err) 
+    catch(err) 
     {
-        next(err);
+        res.status(404).send(`${err} :: Error getting a student`);
     }
 });
 
