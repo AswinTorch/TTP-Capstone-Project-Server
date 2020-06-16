@@ -69,6 +69,7 @@ router.post("/", async (req, res) =>
 
     try 
     {
+        // Creates a new student object and returns the uid
         let return_id = await db
         .collection("Students")
         .add(
@@ -82,14 +83,14 @@ router.post("/", async (req, res) =>
             total_owed: 0,
             enrolled_classes: [],
         })
-        .then((ref) => { return ref.id; })
+        .then(() => { return uid; })
         .catch((err) => console.error(err));
 
         res.status(201).send(return_id);
     } 
     catch (err) 
     {
-        res.status(400).send(`${err} :: Error posting a new student. Be sure to include a uid, first_name, last_name, and email.`);
+        res.status(400).send(`${err} :: Error posting new student. Be sure to include a uid, first_name, last_name, and email.`);
     }
 });
 
