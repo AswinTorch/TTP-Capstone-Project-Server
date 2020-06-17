@@ -1,9 +1,21 @@
-var express = require("express");
-var router = express.Router();
-var firebase = require("firebase");
-var db = require("./db");
+const express = require("express");
+const router = express.Router();
+const db = require("./db");
 
-router.get("/", async (req, res, next) => {
+/**
+ * GET all courses
+ * /api/courses
+ * 
+ * Returns: an object containing a data array and pagination object
+ * - Data array contains course objects
+ * - Pagination object contains key-value of item count
+ * 
+ * Return status:
+ * 200 - OK
+ * 400 - Bad Request
+ */
+router.get("/", async (req, res, next) => 
+{
   const { limit } = req.query;
   // const ind
   try {
