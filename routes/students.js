@@ -93,32 +93,40 @@ router.post("/", async (req, res) => {
 });
 
 /**
- * PUT new course into enrolled_courses array
+ * PUT new course into student's enrolled_courses array
  * /api/students/addCourse/:id
  * 
- * Takes in student id as a parameter, and a course object as the request body
+ * Takes in student id as a parameter, and a course JSON object as the request body
  * 
  * Return Status:
- * 201 - Created
- * 404 - Not Found
+ * 201 - Created: added new course to enrolled_courses
+ * 400 - Bad Request: empty request body, cannot add new course
+ * 404 - Not Found: id does not exist on database
  */
-router.put("/addCourse/:id", async (req, res, next) => 
+router.put("/addCourse/:id", async (req, res) => 
 {
     const { id } = req.params;
 
-    try 
+    let current_student = db.collection("Students").doc(id);
+
+    await current_student.get()
+    .then((doc) =>
     {
-        var current_student = await db.collection("Students").doc(id);
-        current_student.update(
+        if(!doc.exists) res.status(404).send(`Student with id ${id} does not exist`);
+        else
         {
-            enrolled_courses: firebase.firestore.FieldValue.arrayUnion(req.body),
-        });
-        res.status(201).send("Successfully added new course");
-    } 
-    catch (err) 
-    {
-        next(err);
-    }
+            if(req.body.constructor === Object && Object.keys(req.body).length === 0) res.status(400).send("Request body cannot be empty");
+            else
+            {
+                current_student.update(
+                {
+                    enrolled_courses: firebase.firestore.FieldValue.arrayUnion(req.body),
+                });
+                res.status(201).send("Successfully added new course");
+            }
+        }
+    })
+    .catch((err) => console.error(err));
 });
 
 //Remove Course
