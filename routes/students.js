@@ -82,7 +82,7 @@ router.post("/", async (req, res) =>
             total_credit: 0,
             total_received: 0,
             total_owed: 0,
-            enrolled_classes: [],
+            enrolled_courses: [],
         })
         .then(() => { return uid; })
         .catch((err) => console.error(err));

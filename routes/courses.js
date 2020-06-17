@@ -8,8 +8,7 @@ router.get("/", async (req, res, next) => {
   // const ind
   try {
     var collect = await db
-      .collection("Courses")
-      .orderBy("department", "asc")
+      .collection("Courses").orderBy("course_number")     
       .limit(parseInt(limit));
 
     var return_value = await collect
@@ -18,7 +17,7 @@ router.get("/", async (req, res, next) => {
         var return_list = [];
         snapShot.forEach((doc) => {
           var current_campus = doc.data();
-          current_campus["id"] = doc.id;
+          // current_campus["id"] = doc.id;
           return_list.push(current_campus);
         });
         return return_list;
