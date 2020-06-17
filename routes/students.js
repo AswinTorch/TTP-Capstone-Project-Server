@@ -92,9 +92,6 @@ router.post("/", async (req, res) => {
   }
 });
 
-//insert classes enrolled
-//takes in the student id as parameter
-//& course_id as json object
 /**
  * PUT new course into enrolled_courses array
  * /api/students/addCourse/:id
