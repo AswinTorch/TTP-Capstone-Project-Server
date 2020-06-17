@@ -92,22 +92,35 @@ router.post("/", async (req, res) => {
   }
 });
 
-//insert classes enrolled
-//takes in the student id as parameter
-//& course_id as json object
-router.put("/addCourse/:id", async (req, res, next) => {
-  const { id } = req.params;
-  const { course_id } = req.body;
-  try {
-    var current_student = await db.collection("Students").doc(id);
-    current_student.update({
-      enrolled_courses: firebase.firestore.FieldValue.arrayUnion(course_id),
-    });
-    res.status(201).send("sucesss");
-  } catch (err) {
-    next(err);
-  }
+/**
+ * PUT new course into enrolled_courses array
+ * /api/students/addCourse/:id
+ * 
+ * Takes in student id as a parameter, and a course object as the request body
+ * 
+ * Return Status:
+ * 201 - Created
+ * 404 - Not Found
+ */
+router.put("/addCourse/:id", async (req, res, next) => 
+{
+    const { id } = req.params;
+
+    try 
+    {
+        var current_student = await db.collection("Students").doc(id);
+        current_student.update(
+        {
+            enrolled_courses: firebase.firestore.FieldValue.arrayUnion(req.body),
+        });
+        res.status(201).send("Successfully added new course");
+    } 
+    catch (err) 
+    {
+        next(err);
+    }
 });
+
 //Remove Course
 router.put("/removeCourse/:id", async (req, res, next) => {
   const { id } = req.params;
