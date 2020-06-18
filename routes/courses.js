@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const db = require("./db");
-const levensthein_ratio = require("../utility/levensthein"); 
+const levensthein_ratio = require("../utility/levensthein");
 
 /**
  * GET all courses
@@ -39,26 +39,28 @@ router.get("/", async (req, res, next) => {
         total_count: limit,
       };
       console.log("obj grabbed from db");
-      let return_value = { data:get_obj_slice(course_cache, limit), pagination: final_object };
-
-      res.status(200).send(return_value);
-    } catch (err) {
-      
-      next(err);
-    }
-  } else {
-    console.log("obj grabbed from cache");
       let return_value = {
         data: get_obj_slice(course_cache, limit),
         pagination: final_object,
       };
+
+      res.status(200).send(return_value);
+    } catch (err) {
+      next(err);
+    }
+  } else {
+    console.log("obj grabbed from cache");
+    let return_value = {
+      data: get_obj_slice(course_cache, limit),
+      pagination: final_object,
+    };
     res.status(200).send(return_value);
   }
 });
 //id:: GEt data by id number
 router.get("/id/:id", async (req, res, next) => {
   const { id } = req.params;
-  if (is_empty(course_cache)){
+  if (is_empty(course_cache)) {
     try {
       var return_value = await db
         .collection("Courses")
@@ -79,17 +81,16 @@ router.get("/id/:id", async (req, res, next) => {
       res.status(200).send(return_value);
     } catch (err) {
       next(err);
-      }
-  }
-  else {
-    console.log("Course Returned from the cache")
+    }
+  } else {
+    console.log("Course Returned from the cache");
     res.status(200).send(course_cache[id]);
   }
 });
 // Deparment
 // will send the list of all the departments available within the courses
 router.get("/allDepartment", async (req, res, next) => {
-  if (is_empty(course_cache)){
+  if (is_empty(course_cache)) {
     try {
       var return_val = await db
         .collection("Courses")
@@ -116,57 +117,87 @@ router.get("/allDepartment", async (req, res, next) => {
       next(err);
     }
   } else {
-    console.log("CACHED")
-    res.status(200).json(get_all_department(course_cache));    
-    }
+    console.log("CACHED");
+    res.status(200).json(get_all_department(course_cache));
+  }
 });
 router.get("/allDepartment/:dptName", async (req, res, next) => {
   const { dptName } = req.params;
-  if(is_empty(course_cache)){
-  try {
-    var return_val = await db
-      .collection("Courses")
-      .get()
-      .then((snapShot) => {
-        var return_item = [];
-        snapShot.forEach((doc) => {
-          var curr_data = doc.data();
-          if (dptName === curr_data.department) {
-            return_item.push(curr_data);
-          } else {
-            console.log("nah");
-          }
+  if (is_empty(course_cache)) {
+    try {
+      var return_val = await db
+        .collection("Courses")
+        .get()
+        .then((snapShot) => {
+          var return_item = [];
+          snapShot.forEach((doc) => {
+            var curr_data = doc.data();
+            if (dptName === curr_data.department) {
+              return_item.push(curr_data);
+            } else {
+              console.log("nah");
+            }
+          });
+          return return_item;
+        })
+        .catch((err) => {
+          console.log("Could retrive the val ", err);
         });
-        return return_item;
-      })
-      .catch((err) => {
-        console.log("Could retrive the val ", err);
-      });
-    res.status(200).json(return_val);
-  } catch (err) {
-    next(err);
+      res.status(200).json(return_val);
+    } catch (err) {
+      next(err);
     }
   } else {
-    res.status(200).send(get_by_dpt_name(course_cache,dptName))
+    res.status(200).send(get_by_dpt_name(course_cache, dptName));
   }
 });
 //Search route
 router.get("/search", async (req, res, next) => {
   const { search_string } = req.query;
+  console.log(search_string.split(" ").length);
   if (!is_empty(course_cache)) {
     let search_result = [];
-    for (let i in course_cache) {
-      if (levensthein_ratio(`${course_cache[i].course_identifier} ${course_cache[i].course_number}`, search_string) > 0.85) {
-        search_result.push(
-          {
-            "data": course_cache[i],
-            "distance": levensthein_ratio(`${course_cache[i].course_identifier} ${course_cache[i].course_number}`, search_string )});
+    if (search_string.split(" ").length === 1) {
+      for (let i in course_cache) {
+        if (
+          levensthein_ratio(
+            `${course_cache[i].course_identifier}}`,
+            search_string
+          ) > 0.3
+        ) {
+          search_result.push({
+            data: course_cache[i],
+            distance: levensthein_ratio(
+              `${course_cache[i].course_identifier} ${course_cache[i].course_number}`,
+              search_string
+            ),
+          });
+        }
+      }
+    } else if (search_string.split(" ").length >= 1) {
+      for (let i in course_cache) {
+        if (
+          levensthein_ratio(
+            `${course_cache[i].course_identifier} ${course_cache[i].course_number}`,
+            search_string
+          ) > 0.85
+        ) {
+          search_result.push({
+            data: course_cache[i],
+            distance: levensthein_ratio(
+              `${course_cache[i].course_identifier} ${course_cache[i].course_number}`,
+              search_string
+            ),
+          });
+        }
       }
     }
-    search_result.sort((first,second)=>(first.distance<second.distance)?1:-1)
-    res.status(200).send(search_result);
+    search_result.sort((first, second) =>
+      first.distance < second.distance ? 1 : -1
+    );
+    res.status(200).send(search_result.slice(0, 10));
   } else {
-    res.status(500).send("not there")
+    res.status(500).send("not there");
   }
 });
 //Utility functions
@@ -176,7 +207,7 @@ function is_empty(obj) {
   }
   return true;
 }
-//Utility function 
+//Utility function
 function get_obj_slice(obj, limit) {
   let return_list = [];
   let keys = Object.keys(obj);
@@ -190,16 +221,16 @@ function get_obj_slice(obj, limit) {
 function get_all_department(obj) {
   let department_set = new Set();
   for (let i in obj) {
-    department_set.add(obj[i].department)
-  }   
-  return [...department_set]
+    department_set.add(obj[i].department);
+  }
+  return [...department_set];
 }
 //Not the most efficient way to do this but as the database is rather small this should be fine
-function get_by_dpt_name(obj,dpt_name) {
+function get_by_dpt_name(obj, dpt_name) {
   let department = [];
   for (let i in obj) {
     if (obj[i].department === dpt_name) {
-      department.push(obj[i])
+      department.push(obj[i]);
     }
   }
   return department;
