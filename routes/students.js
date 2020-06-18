@@ -141,23 +141,55 @@ router.put("/:id/addcourse", async (req, res) =>
     }
 });
 
-//Remove Course
-router.put("/removeCourse/:id", async (req, res, next) => {
-  const { id } = req.params;
-  try {
-    let new_credit =
-      parseInt(doc.data().total_credit) - parseInt(req.body.units);
-    let current_student = await db.collection("Students").doc(id);
-    current_student.update({
-      total_owed: new_credit * 150,
-      total_credit: new_credit,
-      enrolled_courses: firebase.firestore.FieldValue.arrayRemove(req.body),
-    });
-    res.status(201).send("success");
-  } catch (err) {
-    next(err);
-  }
+/**
+ * DELETE course from student's enrolled_courses array
+ * /api/students/:id/removecourse
+ * 
+ * Takes in student id as parameter, and a course JSON object as the request body
+ * 
+ * Returns: updated student object
+ * 
+ * Return status:
+ * 200 - OK: course removed, or there was no course to remove in the first place
+ * 400 - Bad Request: empty request body, cannot remove course
+ * 404 - Not Found: user id does not exist on database
+ */
+router.delete("/:id/removecourse", async (req, res) => 
+{
+    const { id } = req.params;
+
+    let current_student = db.collection("Students").doc(id);
+
+    try 
+    {
+        await current_student.get()
+        .then((doc) =>
+        {
+            if(doc.exists)
+            {
+                if(req.body.constructor === Object && Object.keys(req.body).length > 0)
+                {
+                    let new_credit = parseInt(doc.data().total_credit) - parseInt(req.body.units);
+                    current_student.update(
+                    {
+                        total_owed: new_credit * 150,
+                        total_credit: new_credit,
+                        enrolled_courses: firebase.firestore.FieldValue.arrayRemove(req.body),
+                    });
+                    res.status(200).send(doc.data());
+                }
+                else res.status(400).send("Request body cannot be empty");
+            }
+            else res.status(404).send(`Student with id ${id} does not exist`);
+        })
+        .catch((err) => console.error(err));
+    }
+    catch (err) 
+    {
+        console.error(err);
+    }
 });
+
 //Swap Course
 //req body take to arguments
 //prev course id and the the new id
