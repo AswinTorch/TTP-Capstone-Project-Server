@@ -95,36 +95,43 @@ router.post("/", async (req, res) => {
 /**
  * PUT new course into student's enrolled_courses array
  * /api/students/addCourse/:id
- * 
+ *
  * Takes in student id as a parameter, and a course JSON object as the request body
- * 
+ *
  * Return Status:
  * 201 - Created: added new course to enrolled_courses
  * 400 - Bad Request: empty request body, cannot add new course
  * 404 - Not Found: id does not exist on database
  */
-router.put("/addCourse/:id", async (req, res) => 
-{
-    const { id } = req.params;
+router.put("/addCourse/:id", async (req, res) => {
+  const { id } = req.params;
 
-    let current_student = db.collection("Students").doc(id);
+  let current_student = db.collection("Students").doc(id);
 
-    await current_student.get()
-    .then((doc) =>
-    {
-        if(!doc.exists) res.status(404).send(`Student with id ${id} does not exist`);
-        else
-        {
-            if(req.body.constructor === Object && Object.keys(req.body).length === 0) res.status(400).send("Request body cannot be empty");
-            else
-            {
-                current_student.update(
-                {
-                    enrolled_courses: firebase.firestore.FieldValue.arrayUnion(req.body),
-                });
-                res.status(201).send("Successfully added new course");
-            }
+  await current_student
+    .get()
+    .then((doc) => {
+      if (!doc.exists)
+        res.status(404).send(`Student with id ${id} does not exist`);
+      else {
+        if (
+          req.body.constructor === Object &&
+          Object.keys(req.body).length === 0
+        )
+          res.status(400).send("Request body cannot be empty");
+        else {
+          let new_credit =
+            parseInt(doc.data().total_credit) + parseInt(req.body.units);
+          current_student.update({
+            total_owed: new_credit * 150,
+            total_credit: new_credit,
+            enrolled_courses: firebase.firestore.FieldValue.arrayUnion(
+              req.body
+            ),
+          });
+          res.status(201).send("Successfully added new course");
         }
+      }
     })
     .catch((err) => console.error(err));
 });
@@ -132,11 +139,14 @@ router.put("/addCourse/:id", async (req, res) =>
 //Remove Course
 router.put("/removeCourse/:id", async (req, res, next) => {
   const { id } = req.params;
-  const { course_id } = req.body;
   try {
-    var current_student = await db.collection("Students").doc(id);
+    let new_credit =
+      parseInt(doc.data().total_credit) - parseInt(req.body.units);
+    let current_student = await db.collection("Students").doc(id);
     current_student.update({
-      enrolled_courses: firebase.firestore.FieldValue.arrayRemove(course_id),
+      total_owed: new_credit * 150,
+      total_credit: new_credit,
+      enrolled_courses: firebase.firestore.FieldValue.arrayRemove(req.body),
     });
     res.status(201).send("success");
   } catch (err) {
@@ -151,7 +161,7 @@ router.put("/swapCourse/:id", async (req, res, next) => {
   //
   const { prev_course_id, new_course_id } = req.body;
   try {
-    var current_student = await db.collection("Students").doc(id);
+    let current_student = await db.collection("Students").doc(id);
     current_student.update({
       enrolled_courses: firebase.firestore.FieldValue.arrayRemove(
         prev_course_id
