@@ -121,7 +121,6 @@ router.put("/:id/addcourse", async (req, res) =>
                 if(req.body.constructor === Object && Object.keys(req.body).length > 0)
                 {
                     let new_credit = parseInt(doc.data().total_credit) + parseInt(req.body.units);
-                    console.log(firebase.firestore.FieldValue.arrayUnion(req.body));
                     current_student.update(
                     {
                         total_owed: new_credit * 150,
