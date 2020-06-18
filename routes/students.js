@@ -5,9 +5,9 @@ var db = require("./db");
 
 /**
  * GET student object from their id
- * /api/students/id/:id
+ * /api/students//:id
  *
- * /api/students/id/10 would return the student object with id 10, if it exists
+ * /api/students//10 would return the student object with id 10, if it exists
  *
  * Returns: the student object associated with the id
  *
@@ -15,7 +15,7 @@ var db = require("./db");
  * 200 - OK
  * 404 - Not found
  */
-router.get("/id/:id", async (req, res, next) => {
+router.get("//:id", async (req, res, next) => {
   const { id } = req.params;
 
   try {
