@@ -205,27 +205,62 @@ router.delete("/:id/removecourse", async (req, res) =>
     }
 });
 
-//Swap Course
-//req body take to arguments
-//prev course id and the the new id
-router.put("/swapCourse/:id", async (req, res, next) => {
-  const { id } = req.params;
-  //
-  const { prev_course_id, new_course_id } = req.body;
-  try {
-    let current_student = await db.collection("Students").doc(id);
-    current_student.update({
-      enrolled_courses: firebase.firestore.FieldValue.arrayRemove(
-        prev_course_id
-      ),
-    });
-    current_student.update({
-      enrolled_courses: firebase.firestore.FieldValue.arrayUnion(new_course_id),
-    });
-    res.status(201).send("success");
-  } catch (err) {
-    next(err);
-  }
+/**
+ * Swapping courses
+ * 
+ * PUT new course in place of the old one
+ * /api/students/:id/swapcourse
+ * 
+ * Takes in student id as parameter, and an array containing two course JSON objects as the request body
+ * 
+ * Returns: updated student object
+ * 
+ * Return status:
+ * 200 - OK: swapping successful
+ * 400 - Bad Request: invalid request body format
+ * 404 - Not Found: user id does not exist on database
+ */
+router.put("/:id/swapcourse", async (req, res) => 
+{
+    const { id } = req.params;
+    const prev_course = req.body[0];
+    const new_course = req.body[1];
+
+    let current_student = db.collection("Students").doc(id);
+
+    console.log(prev_course);
+    console.log(new_course);
+
+    try 
+    {
+        await current_student.get()
+        .then((doc) =>
+        {
+            if(doc.exists)
+            {
+                if(req.body.constructor === Array && Object.keys(req.body).length === 2)
+                {
+                    current_student.update(
+                    {
+                        enrolled_courses: firebase.firestore.FieldValue.arrayRemove(prev_course),
+                    });
+            
+                    current_student.update(
+                    {
+                        enrolled_courses: firebase.firestore.FieldValue.arrayUnion(new_course),
+                    });
+                    res.status(200).send(doc.data());
+                }
+                else res.status(400).send("Invalid request body: expecting an array that contains two JSON objects");
+            }
+            else res.status(404).send(`Student with id ${id} does not exist`);
+        })
+        .catch((err) => console.error(err));
+    } 
+    catch(err) 
+    {
+        console.error(err);
+    }
 });
 
 module.exports = router;
