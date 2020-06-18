@@ -2,7 +2,10 @@ var express = require("express");
 var router = express.Router();
 var firebase = require("firebase");
 var db = require("./db");
+var _ = require("lodash");
 const { debug } = require("console");
+const { send } = require("process");
+const { doc } = require("./db");
 
 /**
  * GET student object from their id
@@ -16,22 +19,31 @@ const { debug } = require("console");
  * 200 - OK: student found on database
  * 404 - Not found: id does not exist on database
  */
+student_cache = {};
 router.get("/:id", async (req, res) => {
   const { id } = req.params;
-
-  try {
-    await db
-      .collection("Students")
-      .doc(id)
-      .get()
-      .then((doc) => {
-        if (!doc.exists)
-          res.status(404).send(`Student with id ${id} does not exist`);
-        else res.status(200).send(doc.data());
-      })
-      .catch((err) => console.error(err));
-  } catch (err) {
-    console.error(err);
+  if (is_empty(student_cache)) {
+    try {
+      await db
+        .collection("Students")
+        .doc(id)
+        .get()
+        .then((doc) => {
+          if (!doc.exists)
+            res.status(404).send(`Student with id ${id} does not exist`);
+          else {
+            student_cache[doc.id] = doc.data();
+            console.log("line 35:::from db");
+            res.status(200).send(doc.data());
+          }
+        })
+        .catch((err) => console.error(err));
+    } catch (err) {
+      console.error(err);
+    }
+  } else {
+    console.log("line 43::cached data was sent");
+    res.status(200).send(student_cache[id]);
   }
 });
 
@@ -63,7 +75,6 @@ router.get("/:id", async (req, res) => {
  */
 router.post("/", async (req, res) => {
   const { uid, firstName, lastName, email } = req.body;
-
   let newStudentObj = {
     uid: uid,
     first_name: firstName,
@@ -77,11 +88,15 @@ router.post("/", async (req, res) => {
 
   try {
     // Creates a new student object and returns it
+
     await db
       .collection("Students")
       .doc(uid)
       .set(newStudentObj)
-      .then(() => res.status(201).send(newStudentObj))
+      .then(() => {
+        student_cache[uid] = newStudentObj;
+        res.status(201).send(student_cache[uid]);
+      })
       .catch((err) => console.log(err));
   } catch (err) {
     res
@@ -119,16 +134,10 @@ router.put("/:id/addcourse", async (req, res) => {
             req.body.constructor === Object &&
             Object.keys(req.body).length > 0
           ) {
-            let enrolled_courses = doc.data().enrolled_courses;
-            let total_credit = 0;
-
-            for (index in enrolled_courses) {
-              total_credit += parseInt(enrolled_courses[index].units);
-            }
-
+            console.log(student_cache);
+            student_cache[id].enrolled_courses.push(req.body);
+            console.log(student_cache);
             current_student.update({
-              total_owed: total_credit * 150,
-              total_credit: total_credit,
               enrolled_courses: firebase.firestore.FieldValue.arrayUnion(
                 req.body
               ),
@@ -156,7 +165,7 @@ router.put("/:id/addcourse", async (req, res) => {
  * 400 - Bad Request: empty request body, cannot remove course
  * 404 - Not Found: user id does not exist on database
  */
-router.delete("/:id/removecourse", async (req, res) => {
+router.put("/:id/removecourse", async (req, res) => {
   const { id } = req.params;
 
   let current_student = db.collection("Students").doc(id);
@@ -170,16 +179,15 @@ router.delete("/:id/removecourse", async (req, res) => {
             req.body.constructor === Object &&
             Object.keys(req.body).length > 0
           ) {
-            let enrolled_courses = doc.data().enrolled_courses;
-            let total_credit = 0;
+            console.log(student_cache[id].enrolled_courses);
 
-            for (index in enrolled_courses) {
-              total_credit += parseInt(enrolled_courses[index].units);
-            }
-
+            let new_e_c = array_remove(
+              student_cache[id].enrolled_courses,
+              req.body
+            );
+            student_cache[id].enrolled_courses = new_e_c;
+            console.log(student_cache);
             current_student.update({
-              total_owed: total_credit * 150,
-              total_credit: total_credit,
               enrolled_courses: firebase.firestore.FieldValue.arrayRemove(
                 req.body
               ),
@@ -228,6 +236,12 @@ router.put("/:id/swapcourse", async (req, res) => {
             req.body.constructor === Array &&
             Object.keys(req.body).length === 2
           ) {
+            let cached_enrolled_course = array_remove(
+              student_cache[id].enrolled_courses,
+              prev_course
+            );
+            student_cache[id].enrolled_courses = cached_enrolled_course;
+            student_cache[id].enrolled_courses.push(new_course);
             current_student.update({
               enrolled_courses: firebase.firestore.FieldValue.arrayRemove(
                 prev_course
@@ -253,5 +267,35 @@ router.put("/:id/swapcourse", async (req, res) => {
     console.error(err);
   }
 });
-
+//Utility functions
+function is_empty(obj) {
+  for (var key in obj) {
+    if (obj.hasOwnProperty(key)) return false;
+  }
+  return true;
+}
+function array_remove(arr, value) {
+  let return_value = [];
+  for (let i of arr) {
+    if (!_.isEqual(i, value)) {
+      return_value.push(i);
+    }
+  }
+  console.log(return_value)
+  return return_value;
+}
+// function is_equivalent(a, b) {
+//   var a_property = Object.getOwnPropertyNames(a);
+//   var b_property = Object.getOwnPropertyNames(b);
+//   if (a_property.length != b_property.length) {
+//     return false;
+//   }
+//   for (var i = 0; i < a_property.length; i++) {
+//     var prop_name = a_property[i];
+//     if (a[prop_name] !== b[prop_name]) {
+//       return false;
+//     }
+//   }
+//   return true;
+// }
 module.exports = router;
