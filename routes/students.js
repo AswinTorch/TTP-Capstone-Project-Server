@@ -2,6 +2,7 @@ var express = require("express");
 var router = express.Router();
 var firebase = require("firebase");
 var db = require("./db");
+const { debug } = require("console");
 
 /**
  * GET student object from their id
@@ -169,11 +170,18 @@ router.delete("/:id/removecourse", async (req, res) =>
             {
                 if(req.body.constructor === Object && Object.keys(req.body).length > 0)
                 {
-                    let new_credit = parseInt(doc.data().total_credit) - parseInt(req.body.units);
+                    let enrolled_courses = doc.data().enrolled_courses;
+                    let total_credit = 0;
+
+                    for(index in enrolled_courses)
+                    {
+                        total_credit += parseInt(enrolled_courses[index].units);
+                    }
+
                     current_student.update(
                     {
-                        total_owed: new_credit * 150,
-                        total_credit: new_credit,
+                        total_owed: total_credit * 150,
+                        total_credit: total_credit,
                         enrolled_courses: firebase.firestore.FieldValue.arrayRemove(req.body),
                     });
                     res.status(200).send(doc.data());
