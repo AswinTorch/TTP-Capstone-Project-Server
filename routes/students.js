@@ -94,46 +94,52 @@ router.post("/", async (req, res) => {
 
 /**
  * PUT new course into student's enrolled_courses array
- * /api/students/addCourse/:id
- *
- * Takes in student id as a parameter, and a course JSON object as the request body
- *
- * Return Status:
- * 201 - Created: added new course to enrolled_courses
+ * /api/students/:id/addcourse
+ * 
+ * Takes in student id as parameter, and a course JSON object as the request body
+ * 
+ * Returns: updated student object
+ * 
+ * Return status:
+ * 201 - Created: added new courses to enrolled_courses
  * 400 - Bad Request: empty request body, cannot add new course
- * 404 - Not Found: id does not exist on database
+ * 404 - Not Found: user id does not exist on database
  */
-router.put("/addCourse/:id", async (req, res) => {
-  const { id } = req.params;
+router.put("/:id/addcourse", async (req, res) =>
+{
+    const { id } = req.params;
 
-  let current_student = db.collection("Students").doc(id);
+    let current_student = db.collection("Students").doc(id);
 
-  await current_student
-    .get()
-    .then((doc) => {
-      if (!doc.exists)
-        res.status(404).send(`Student with id ${id} does not exist`);
-      else {
-        if (
-          req.body.constructor === Object &&
-          Object.keys(req.body).length === 0
-        )
-          res.status(400).send("Request body cannot be empty");
-        else {
-          let new_credit =
-            parseInt(doc.data().total_credit) + parseInt(req.body.units);
-          current_student.update({
-            total_owed: new_credit * 150,
-            total_credit: new_credit,
-            enrolled_courses: firebase.firestore.FieldValue.arrayUnion(
-              req.body
-            ),
-          });
-          res.status(201).send("Successfully added new course");
-        }
-      }
-    })
-    .catch((err) => console.error(err));
+    try
+    {
+        await current_student.get()
+        .then((doc) =>
+        {
+            if(doc.exists)
+            {
+                if(req.body.constructor === Object && Object.keys(req.body).length > 0)
+                {
+                    let new_credit = parseInt(doc.data().total_credit) + parseInt(req.body.units);
+                    console.log(firebase.firestore.FieldValue.arrayUnion(req.body));
+                    current_student.update(
+                    {
+                        total_owed: new_credit * 150,
+                        total_credit: new_credit,
+                        enrolled_courses: firebase.firestore.FieldValue.arrayUnion(req.body)
+                    });
+                    res.status(201).send(doc.data());
+                }
+                else res.status(400).send("Request body cannot be empty");
+            } 
+            else res.status(404).send(`Student with id ${id} does not exist`);
+        })
+        .catch((err) => console.error(err));
+    }
+    catch(err)
+    {
+        console.error(err);
+    }
 });
 
 //Remove Course
