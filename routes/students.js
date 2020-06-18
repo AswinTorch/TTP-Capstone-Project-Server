@@ -98,7 +98,7 @@ router.post("/", async (req, res) => {
  *
  * Takes in student id as parameter, and a course JSON object as the request body
  *
- * Returns: updated student object
+ * Returns: course object that was added
  *
  * Return status:
  * 201 - Created: added new courses to enrolled_courses
@@ -149,17 +149,19 @@ router.put("/:id/addcourse", async (req, res) => {
  *
  * Takes in student id as parameter, and a course JSON object as the request body
  *
- * Returns: updated student object
+ * Returns: course object that was removed
  *
  * Return status:
  * 200 - OK: course removed, or there was no course to remove in the first place
  * 400 - Bad Request: empty request body, cannot remove course
  * 404 - Not Found: user id does not exist on database
  */
-router.delete("/:id/removecourse", async (req, res) => {
+router.put("/:id/removecourse", async (req, res) => {
   const { id } = req.params;
 
   let current_student = db.collection("Students").doc(id);
+
+  console.log("body:", req.body);
 
   try {
     await current_student
@@ -184,7 +186,7 @@ router.delete("/:id/removecourse", async (req, res) => {
                 req.body
               ),
             });
-            res.status(200).send(doc.data());
+            res.status(200).send(req.body);
           } else res.status(400).send("Request body cannot be empty");
         } else res.status(404).send(`Student with id ${id} does not exist`);
       })
