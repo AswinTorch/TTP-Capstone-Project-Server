@@ -53,21 +53,19 @@ router.get("/:id", async (req, res, next) => {
  *
  * let user = firebase.auth().currentUser;
  *
- * Returns: the newly created UUID
+ * Returns: the newly created student object
  *
  * Return status:
- * 201 - Created
- * 400 - Bad Request
+ * 201 - Created: new student object added to the database
+ * 400 - Bad Request: request body does not have enough information to create 
+ * a new student
  */
-router.post("/", async (req, res) => {
-  const { uid, firstName, lastName, email } = req.body;
+router.post("/", async (req, res) => 
+{
+    const { uid, firstName, lastName, email } = req.body;
 
-  try {
-    // Creates a new student object and returns the uid
-    let return_id = await db
-      .collection("Students")
-      .doc(uid)
-      .set({
+    let newStudentObj =
+    {
         uid: uid,
         first_name: firstName,
         last_name: lastName,
@@ -76,20 +74,20 @@ router.post("/", async (req, res) => {
         total_received: 0,
         total_owed: 0,
         enrolled_courses: [],
-      })
-      .then(() => {
-        return uid;
-      })
-      .catch((err) => console.error(err));
+    };
 
-    res.status(201).send(return_id);
-  } catch (err) {
-    res
-      .status(400)
-      .send(
-        `${err} :: Error posting new student. Be sure to include a uid, first_name, last_name, and email.`
-      );
-  }
+    try 
+    {
+        // Creates a new student object and returns it
+        await db.collection("Students")
+        .doc(uid).set(newStudentObj)
+        .then(() => res.status(201).send(newStudentObj))
+        .catch((err) => console.log(err));
+    } 
+    catch(err) 
+    {
+        res.status(400).send(`${err}\nError posting new student. Be sure to include a uid, first_name, last_name, and email.`);
+    }
 });
 
 /**
