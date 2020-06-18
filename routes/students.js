@@ -12,26 +12,28 @@ var db = require("./db");
  * Returns: the student object associated with the id
  *
  * Return status:
- * 200 - OK
- * 404 - Not found
+ * 200 - OK: student found on database
+ * 404 - Not found: id does not exist on database
  */
-router.get("/:id", async (req, res, next) => {
-  const { id } = req.params;
+router.get("/:id", async (req, res) => 
+{
+    const { id } = req.params;
 
-  try {
-    var return_val = await db
-      .collection("Students")
-      .doc(id)
-      .get()
-      .then((doc) => {
-        if (!doc.exists)
-          res.status(404).send("Error getting a student. Is the ID correct?");
-        else res.status(200).send(doc.data());
-      })
-      .catch((err) => console.error(err));
-  } catch (err) {
-    res.status(404).send(`${err} :: Error getting a student`);
-  }
+    try
+    {
+        await db.collection("Students")
+        .doc(id).get()
+        .then((doc) =>
+        {
+            if(!doc.exists) res.status(404).send(`Student with id ${id} does not exist`);
+            else res.status(200).send(doc.data());
+        })
+        .catch((err) => console.error(err));
+    }
+    catch(err)
+    {
+        console.error(err);
+    } 
 });
 
 /**
