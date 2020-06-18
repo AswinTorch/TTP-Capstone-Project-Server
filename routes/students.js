@@ -2,6 +2,7 @@ var express = require("express");
 var router = express.Router();
 var firebase = require("firebase");
 var db = require("./db");
+const { debug } = require("console");
 
 /**
  * GET student object from their id
@@ -120,12 +121,18 @@ router.put("/:id/addcourse", async (req, res) =>
             {
                 if(req.body.constructor === Object && Object.keys(req.body).length > 0)
                 {
-                    let new_credit = parseInt(doc.data().total_credit) + parseInt(req.body.units);
-                    console.log(firebase.firestore.FieldValue.arrayUnion(req.body));
+                    let enrolled_courses = doc.data().enrolled_courses;
+                    let total_credit = 0;
+
+                    for(index in enrolled_courses)
+                    {
+                        total_credit += parseInt(enrolled_courses[index].units);
+                    }
+
                     current_student.update(
                     {
-                        total_owed: new_credit * 150,
-                        total_credit: new_credit,
+                        total_owed: total_credit * 150,
+                        total_credit: total_credit,
                         enrolled_courses: firebase.firestore.FieldValue.arrayUnion(req.body)
                     });
                     res.status(201).send(doc.data());
@@ -142,44 +149,118 @@ router.put("/:id/addcourse", async (req, res) =>
     }
 });
 
-//Remove Course
-router.put("/removeCourse/:id", async (req, res, next) => {
-  const { id } = req.params;
-  try {
-    let new_credit =
-      parseInt(doc.data().total_credit) - parseInt(req.body.units);
-    let current_student = await db.collection("Students").doc(id);
-    current_student.update({
-      total_owed: new_credit * 150,
-      total_credit: new_credit,
-      enrolled_courses: firebase.firestore.FieldValue.arrayRemove(req.body),
-    });
-    res.status(201).send("success");
-  } catch (err) {
-    next(err);
-  }
+/**
+ * DELETE course from student's enrolled_courses array
+ * /api/students/:id/removecourse
+ * 
+ * Takes in student id as parameter, and a course JSON object as the request body
+ * 
+ * Returns: updated student object
+ * 
+ * Return status:
+ * 200 - OK: course removed, or there was no course to remove in the first place
+ * 400 - Bad Request: empty request body, cannot remove course
+ * 404 - Not Found: user id does not exist on database
+ */
+router.delete("/:id/removecourse", async (req, res) => 
+{
+    const { id } = req.params;
+
+    let current_student = db.collection("Students").doc(id);
+
+    try 
+    {
+        await current_student.get()
+        .then((doc) =>
+        {
+            if(doc.exists)
+            {
+                if(req.body.constructor === Object && Object.keys(req.body).length > 0)
+                {
+                    let enrolled_courses = doc.data().enrolled_courses;
+                    let total_credit = 0;
+
+                    for(index in enrolled_courses)
+                    {
+                        total_credit += parseInt(enrolled_courses[index].units);
+                    }
+
+                    current_student.update(
+                    {
+                        total_owed: total_credit * 150,
+                        total_credit: total_credit,
+                        enrolled_courses: firebase.firestore.FieldValue.arrayRemove(req.body),
+                    });
+                    res.status(200).send(doc.data());
+                }
+                else res.status(400).send("Request body cannot be empty");
+            }
+            else res.status(404).send(`Student with id ${id} does not exist`);
+        })
+        .catch((err) => console.error(err));
+    }
+    catch (err) 
+    {
+        console.error(err);
+    }
 });
-//Swap Course
-//req body take to arguments
-//prev course id and the the new id
-router.put("/swapCourse/:id", async (req, res, next) => {
-  const { id } = req.params;
-  //
-  const { prev_course_id, new_course_id } = req.body;
-  try {
-    let current_student = await db.collection("Students").doc(id);
-    current_student.update({
-      enrolled_courses: firebase.firestore.FieldValue.arrayRemove(
-        prev_course_id
-      ),
-    });
-    current_student.update({
-      enrolled_courses: firebase.firestore.FieldValue.arrayUnion(new_course_id),
-    });
-    res.status(201).send("success");
-  } catch (err) {
-    next(err);
-  }
+
+/**
+ * Swapping courses
+ * 
+ * PUT new course in place of the old one
+ * /api/students/:id/swapcourse
+ * 
+ * Takes in student id as parameter, and an array containing two course JSON objects as the request body
+ * 
+ * Returns: updated student object
+ * 
+ * Return status:
+ * 200 - OK: swapping successful
+ * 400 - Bad Request: invalid request body format
+ * 404 - Not Found: user id does not exist on database
+ */
+router.put("/:id/swapcourse", async (req, res) => 
+{
+    const { id } = req.params;
+    const prev_course = req.body[0];
+    const new_course = req.body[1];
+
+    let current_student = db.collection("Students").doc(id);
+
+    console.log(prev_course);
+    console.log(new_course);
+
+    try 
+    {
+        await current_student.get()
+        .then((doc) =>
+        {
+            if(doc.exists)
+            {
+                if(req.body.constructor === Array && Object.keys(req.body).length === 2)
+                {
+                    current_student.update(
+                    {
+                        enrolled_courses: firebase.firestore.FieldValue.arrayRemove(prev_course),
+                    });
+            
+                    current_student.update(
+                    {
+                        enrolled_courses: firebase.firestore.FieldValue.arrayUnion(new_course),
+                    });
+                    res.status(200).send(doc.data());
+                }
+                else res.status(400).send("Invalid request body: expecting an array that contains two JSON objects");
+            }
+            else res.status(404).send(`Student with id ${id} does not exist`);
+        })
+        .catch((err) => console.error(err));
+    } 
+    catch(err) 
+    {
+        console.error(err);
+    }
 });
 
 module.exports = router;
