@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const db = require("./db");
+const levensthein_ratio = require("../utility/levensthein"); 
 
 /**
  * GET all courses
@@ -149,6 +150,25 @@ router.get("/allDepartment/:dptName", async (req, res, next) => {
     res.status(200).send(get_by_dpt_name(course_cache,dptName))
   }
 });
+//Search route
+router.get("/search", async (req, res, next) => {
+  const { search_string } = req.query;
+  if (!is_empty(course_cache)) {
+    let search_result = [];
+    for (let i in course_cache) {
+      if (levensthein_ratio(`${course_cache[i].course_identifier} ${course_cache[i].course_number}`, search_string) > 0.85) {
+        search_result.push(
+          {
+            "data": course_cache[i],
+            "distance": levensthein_ratio(`${course_cache[i].course_identifier} ${course_cache[i].course_number}`, search_string )});
+      }
+    }
+    search_result.sort((first,second)=>(first.distance<second.distance)?1:-1)
+    res.status(200).send(search_result);
+  } else {
+    res.status(500).send("not there")
+  }
+});
 //Utility functions
 function is_empty(obj) {
   for (var key in obj) {
@@ -156,6 +176,7 @@ function is_empty(obj) {
   }
   return true;
 }
+//Utility function 
 function get_obj_slice(obj, limit) {
   let return_list = [];
   let keys = Object.keys(obj);
@@ -183,4 +204,5 @@ function get_by_dpt_name(obj,dpt_name) {
   }
   return department;
 }
+
 module.exports = router;

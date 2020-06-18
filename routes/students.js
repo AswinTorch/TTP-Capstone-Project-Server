@@ -283,7 +283,6 @@ function array_remove(arr, value) {
       return_value.push(i);
     }
   }
-  console.log(return_value)
   return return_value;
 }
 // function is_equivalent(a, b) {
