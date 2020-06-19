@@ -84,6 +84,7 @@ router.post("/", async (req, res) => {
     last_name: lastName,
     email: email,
     enrolled_courses: [],
+    transaction_history: []
   };
 
   try {
