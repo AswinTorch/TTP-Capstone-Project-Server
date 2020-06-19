@@ -157,13 +157,12 @@ router.get("/search", async (req, res, next) => {
   console.log(search_string.split(" ").length);
   if (!is_empty(course_cache)) {
     let search_result = [];
-    if (search_string.split(" ").length === 1) {
       for (let i in course_cache) {
         if (
           levensthein_ratio(
-            `${course_cache[i].course_identifier}}`,
+            `${course_cache[i].course_identifier} ${course_cache[i].course_number}`,
             search_string
-          ) > 0.3
+          ) > 0.20
         ) {
           search_result.push({
             data: course_cache[i],
@@ -173,32 +172,15 @@ router.get("/search", async (req, res, next) => {
             ),
           });
         }
-      }
-    } else if (search_string.split(" ").length >= 1) {
-      for (let i in course_cache) {
-        if (
-          levensthein_ratio(
-            `${(course_cache[i].course_identifier).toLowerCase()} ${course_cache[i].course_number}`,
-            search_string
-          ) > 0.85
-        ) {
-          search_result.push({
-            data: course_cache[i],
-            distance: levensthein_ratio(
-              `${course_cache[i].course_identifier} ${course_cache[i].course_number}`,
-              search_string
-            ),
-          });
-        }
-      }
     }
-    search_result.sort((first, second) =>
+       search_result.sort((first, second) =>
       first.distance < second.distance ? 1 : -1
     );
     res.status(200).send(search_result.slice(0, 10));
-  } else {
+    } 
+   else {
     res.status(500).send("not there");
-  }
+}
 });
 //Utility functions
 function is_empty(obj) {
