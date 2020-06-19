@@ -7,7 +7,7 @@ const { debug } = require("console");
 const { send } = require("process");
 const { doc } = require("./db");
 
-/**
+/*
  * GET student object from their id
  * /api/students/:id
  *
