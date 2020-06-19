@@ -63,6 +63,7 @@ router.get("/:id", async (req, res) => {
  * - email
  * And the default value:
  * - enrolled_classes: []
+ * - transaction_history: []
  *
  * Upon sign in, Firebase Authentication will generate a random uid for the new user.
  * After sign in, the signed-in user can be accessed by using the currentUser property:

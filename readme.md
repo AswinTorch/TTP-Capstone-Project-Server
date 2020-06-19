@@ -28,11 +28,9 @@ axios.get(`/api/students/${uid}`)
  * - uid
  * - displayName: first and last name
  * - email
- * And the default values:
- * - total_credit: 0
- * - total_received: 0
- * - total_owed: 0
+ * And the default value:
  * - enrolled_classes: []
+ * - transaction_history: []
  *
  * Upon sign in, Firebase Authentication will generate a random uid for the new user.
  * After sign in, the signed-in user can be accessed by using the currentUser property:
@@ -58,14 +56,14 @@ axios.post("/api/students/", student)
  *
  * Takes in student id as parameter, and a course JSON object as the request body
  *
- * Returns: updated student object
+ * Returns: course object that was added and the transaction
  *
  * Return status:
  * 201 - Created: added new courses to enrolled_courses
  * 400 - Bad Request: empty request body, cannot add new course
  * 404 - Not Found: user id does not exist on database
  */
-axios.put(`/api/students/${uid}`, course)
+axios.put(`/api/students/${uid}/addcourse`, course)
 .then((res) => console.log(res.data))
 .catch((err) => console.error(err));
 ```
@@ -77,14 +75,14 @@ axios.put(`/api/students/${uid}`, course)
  *
  * Takes in student id as parameter, and a course JSON object as the request body
  *
- * Returns: updated student object
+ * Returns: course object that was removed and the transaction
  *
  * Return status:
  * 200 - OK: course removed, or there was no course to remove in the first place
  * 400 - Bad Request: empty request body, cannot remove course
  * 404 - Not Found: user id does not exist on database
  */
-axios.delete(`/api/students/${uid}`, course)
+axios.put(`/api/students/${uid}/removecourse`, course)
 .then((res) => console.log(res.data))
 .catch((err) => console.error(err));
 ```
@@ -94,20 +92,18 @@ axios.delete(`/api/students/${uid}`, course)
  * Swapping courses
  *
  * PUT new course in place of the old one
- * /api/students/:id/swapcourse
+ * /api/students/:id/swapcourses
  *
  * Takes in student id as parameter, and an array containing two course JSON objects as the request body
  *
- * Returns: updated student object
+ * Returns: course objects to be swapped and the transaction
  *
  * Return status:
  * 200 - OK: swapping successful
  * 400 - Bad Request: invalid request body format
  * 404 - Not Found: user id does not exist on database
  */
-let courses = [prevCourse, newCourse];
-
-axios.put(`/api/students/${uid}`, courses)
+axios.put(`/api/students/${uid}/swapcourses`, [prevCourse, newCourse])
 .then((res) => console.log(res.data))
 .catch((err) => console.error(err));
 ```
