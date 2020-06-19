@@ -42,8 +42,13 @@ router.get("/:id", async (req, res) => {
       console.error(err);
     }
   } else {
-    console.log("line 43::cached data was sent");
-    res.status(200).send(student_cache[id]);
+    if(typeof(student_cache[id])!= undefined ){
+      console.log("line 43::cached data was sent");
+      res.status(200).send(student_cache[id]);
+    }
+    else {
+      res.status(404).send(`Student with id : ${id} does not exist in the cache`)
+    }
   }
 });
 
