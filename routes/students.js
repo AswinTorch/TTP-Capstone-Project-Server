@@ -235,62 +235,68 @@ router.put("/:id/removecourse", async (req, res) =>
  *
  * Takes in student id as parameter, and an array containing two course JSON objects as the request body
  *
- * Returns: course objects to be swapped
+ * Returns: course objects to be swapped and the transaction
  *
  * Return status:
  * 200 - OK: swapping successful
  * 400 - Bad Request: invalid request body format
  * 404 - Not Found: user id does not exist on database
  */
-router.put("/:id/swapcourses", async (req, res) => {
-  const { id } = req.params;
-  const prev_course = req.body[0];
-  const new_course = req.body[1];
+router.put("/:id/swapcourses", async (req, res) => 
+{
+    const { id } = req.params;
+    const prev_course = req.body[0];
+    const new_course = req.body[1];
 
-  let current_student = db.collection("Students").doc(id);
+    let current_student = db.collection("Students").doc(id);
 
-  console.log(prev_course);
-  console.log(new_course);
+    // console.log(prev_course);
+    // console.log(new_course);
 
-  try {
-    await current_student
-      .get()
-      .then((doc) => {
-        if (doc.exists) {
-          if (
-            req.body.constructor === Array &&
-            Object.keys(req.body).length === 2
-          ) {
-            let cached_enrolled_course = array_remove(
-              student_cache[id].enrolled_courses,
-              prev_course
-            );
-            student_cache[id].enrolled_courses = cached_enrolled_course;
-            student_cache[id].enrolled_courses.push(new_course);
-            current_student.update({
-              enrolled_courses: firebase.firestore.FieldValue.arrayRemove(
-                prev_course
-              ),
-            });
+    try 
+    {
+        await current_student.get()
+        .then((doc) => 
+        {
+            if (doc.exists) 
+            {
+                if (req.body.constructor === Array && Object.keys(req.body).length === 2) 
+                {
+                    let transaction =
+                    {
+                        action: "SWAP_COURSES",
+                        date: new Date().toISOString(),
+                        package: req.body
+                    };
 
-            current_student.update({
-              enrolled_courses: firebase.firestore.FieldValue.arrayUnion(
-                new_course
-              ),
-            });
-            res.status(200).send(req.body);
-          } else
-            res
-              .status(400)
-              .send(
-                "Invalid request body: expecting an array that contains two JSON objects"
-              );
-        } else res.status(404).send(`Student with id ${id} does not exist`);
-      })
-      .catch((err) => console.error(err));
-  } catch (err) {
-    console.error(err);
-  }
+                    let cached_enrolled_course = array_remove(student_cache[id].enrolled_courses, prev_course);
+
+                    student_cache[id].enrolled_courses = cached_enrolled_course;
+                    student_cache[id].enrolled_courses.push(new_course);
+                    student_cache[id].transaction_history.push(transaction);
+
+                    current_student.update(
+                    {
+                        enrolled_courses: firebase.firestore.FieldValue.arrayRemove(prev_course),
+                    });
+
+                    current_student.update(
+                    {
+                        enrolled_courses: firebase.firestore.FieldValue.arrayUnion(new_course),
+                        transaction_history: firebase.firestore.FieldValue.arrayUnion(transaction)
+                    });
+                    res.status(200).send({ courses: req.body, transaction });
+                } 
+                else res.status(400).send("Invalid request body: expecting an array that contains two JSON objects");
+            } 
+            else res.status(404).send(`Student with id ${id} does not exist`);
+        })
+        .catch((err) => console.error(err));
+    } 
+    catch(err) 
+    {
+        console.error(err);
+    }
 });
 //Utility functions
 function is_empty(obj) {
