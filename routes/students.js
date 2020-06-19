@@ -172,50 +172,59 @@ router.put("/:id/addcourse", async (req, res) =>
  *
  * Takes in student id as parameter, and a course JSON object as the request body
  *
- * Returns: course object that was removed
+ * Returns: course object that was removed and the transaction
  *
  * Return status:
  * 200 - OK: course removed, or there was no course to remove in the first place
  * 400 - Bad Request: empty request body, cannot remove course
  * 404 - Not Found: user id does not exist on database
  */
-router.put("/:id/removecourse", async (req, res) => {
-  const { id } = req.params;
+router.put("/:id/removecourse", async (req, res) => 
+{
+    const { id } = req.params;
 
-  let current_student = db.collection("Students").doc(id);
+    let current_student = db.collection("Students").doc(id);
 
-  console.log("body:", req.body);
+    // console.log("body:", req.body);
 
-  try {
-    await current_student
-      .get()
-      .then((doc) => {
-        if (doc.exists) {
-          if (
-            req.body.constructor === Object &&
-            Object.keys(req.body).length > 0
-          ) {
-            console.log(student_cache[id].enrolled_courses);
+    try 
+    {
+        await current_student.get()
+        .then((doc) => 
+        {
+            if (doc.exists) 
+            {
+                if (req.body.constructor === Object && Object.keys(req.body).length > 0) 
+                {
+                    // console.log(student_cache[id].enrolled_courses);
+                    let transaction =
+                    {
+                        action: "DROP_COURSE",
+                        date: new Date().toISOString(),
+                        package: req.body
+                    };
 
-            let new_e_c = array_remove(
-              student_cache[id].enrolled_courses,
-              req.body
-            );
-            student_cache[id].enrolled_courses = new_e_c;
-            console.log(student_cache);
-            current_student.update({
-              enrolled_courses: firebase.firestore.FieldValue.arrayRemove(
-                req.body
-              ),
-            });
-            res.status(200).send(req.body);
-          } else res.status(400).send("Request body cannot be empty");
-        } else res.status(404).send(`Student with id ${id} does not exist`);
-      })
-      .catch((err) => console.error(err));
-  } catch (err) {
-    console.error(err);
-  }
+                    let new_e_c = array_remove(student_cache[id].enrolled_courses, req.body);
+                    student_cache[id].enrolled_courses = new_e_c;
+                    student_cache[id].transaction_history.push(transaction);
+                    // console.log(student_cache);
+                    current_student.update(
+                    {
+                        enrolled_courses: firebase.firestore.FieldValue.arrayRemove(req.body),
+                        transaction_history: firebase.firestore.FieldValue.arrayUnion(transaction)
+                    });
+                    res.status(200).send({ course: req.body, transaction });
+                } 
+                else res.status(400).send("Request body cannot be empty");
+            } 
+            else res.status(404).send(`Student with id ${id} does not exist`);
+        })
+        .catch((err) => console.error(err));
+    } 
+    catch(err) 
+    {
+        console.error(err);
+    }
 });
 
 /**
