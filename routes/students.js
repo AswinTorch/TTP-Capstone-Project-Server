@@ -61,10 +61,7 @@ router.get("/:id", async (req, res) => {
  * - uid
  * - displayName: first and last name
  * - email
- * And the default values:
- * - total_credit: 0
- * - total_received: 0
- * - total_owed: 0
+ * And the default value:
  * - enrolled_classes: []
  *
  * Upon sign in, Firebase Authentication will generate a random uid for the new user.
@@ -86,9 +83,6 @@ router.post("/", async (req, res) => {
     first_name: firstName,
     last_name: lastName,
     email: email,
-    total_credit: 0,
-    total_received: 0,
-    total_owed: 0,
     enrolled_courses: [],
   };
 
