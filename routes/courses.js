@@ -178,7 +178,7 @@ router.get("/search", async (req, res, next) => {
       for (let i in course_cache) {
         if (
           levensthein_ratio(
-            `${course_cache[i].course_identifier} ${course_cache[i].course_number}`,
+            `${(course_cache[i].course_identifier).toLowerCase()} ${course_cache[i].course_number}`,
             search_string
           ) > 0.85
         ) {
