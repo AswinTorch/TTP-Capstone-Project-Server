@@ -114,43 +114,56 @@ router.post("/", async (req, res) => {
  *
  * Takes in student id as parameter, and a course JSON object as the request body
  *
- * Returns: course object that was added
+ * Returns: course object that was added and the transaction
  *
  * Return status:
  * 201 - Created: added new courses to enrolled_courses
  * 400 - Bad Request: empty request body, cannot add new course
  * 404 - Not Found: user id does not exist on database
  */
-router.put("/:id/addcourse", async (req, res) => {
-  const { id } = req.params;
+router.put("/:id/addcourse", async (req, res) => 
+{
+    const { id } = req.params;
 
-  let current_student = db.collection("Students").doc(id);
+    let current_student = db.collection("Students").doc(id);
 
-  try {
-    await current_student
-      .get()
-      .then((doc) => {
-        if (doc.exists) {
-          if (
-            req.body.constructor === Object &&
-            Object.keys(req.body).length > 0
-          ) {
-            console.log(student_cache);
-            student_cache[id].enrolled_courses.push(req.body);
-            console.log(student_cache);
-            current_student.update({
-              enrolled_courses: firebase.firestore.FieldValue.arrayUnion(
-                req.body
-              ),
-            });
-            res.status(201).send(req.body);
-          } else res.status(400).send("Request body cannot be empty");
-        } else res.status(404).send(`Student with id ${id} does not exist`);
-      })
-      .catch((err) => console.error(err));
-  } catch (err) {
-    console.error(err);
-  }
+    try 
+    {
+        await current_student.get()
+        .then((doc) => 
+        {
+            if (doc.exists) 
+            {
+                if (req.body.constructor === Object && Object.keys(req.body).length > 0) 
+                {
+                    let transaction =
+                    {
+                        action: "ADD_COURSE",
+                        date: new Date().toISOString(),
+                        package: req.body
+                    };
+
+                    // console.log(student_cache);
+                    student_cache[id].enrolled_courses.push(req.body);
+                    student_cache[id].transaction_history.push(transaction);
+                    // console.log(student_cache);
+                    current_student.update(
+                    {
+                        enrolled_courses: firebase.firestore.FieldValue.arrayUnion(req.body),
+                        transaction_history: firebase.firestore.FieldValue.arrayUnion(transaction)
+                    });
+                    res.status(201).send({ course: req.body, transaction });
+                } 
+                else res.status(400).send("Request body cannot be empty");
+            } 
+            else res.status(404).send(`Student with id ${id} does not exist`);
+        })
+        .catch((err) => console.error(err));
+    } 
+    catch(err) 
+    {
+        console.error(err);
+    }
 });
 
 /**
@@ -159,50 +172,59 @@ router.put("/:id/addcourse", async (req, res) => {
  *
  * Takes in student id as parameter, and a course JSON object as the request body
  *
- * Returns: course object that was removed
+ * Returns: course object that was removed and the transaction
  *
  * Return status:
  * 200 - OK: course removed, or there was no course to remove in the first place
  * 400 - Bad Request: empty request body, cannot remove course
  * 404 - Not Found: user id does not exist on database
  */
-router.put("/:id/removecourse", async (req, res) => {
-  const { id } = req.params;
+router.put("/:id/removecourse", async (req, res) => 
+{
+    const { id } = req.params;
 
-  let current_student = db.collection("Students").doc(id);
+    let current_student = db.collection("Students").doc(id);
 
-  console.log("body:", req.body);
+    // console.log("body:", req.body);
 
-  try {
-    await current_student
-      .get()
-      .then((doc) => {
-        if (doc.exists) {
-          if (
-            req.body.constructor === Object &&
-            Object.keys(req.body).length > 0
-          ) {
-            console.log(student_cache[id].enrolled_courses);
+    try 
+    {
+        await current_student.get()
+        .then((doc) => 
+        {
+            if (doc.exists) 
+            {
+                if (req.body.constructor === Object && Object.keys(req.body).length > 0) 
+                {
+                    // console.log(student_cache[id].enrolled_courses);
+                    let transaction =
+                    {
+                        action: "DROP_COURSE",
+                        date: new Date().toISOString(),
+                        package: req.body
+                    };
 
-            let new_e_c = array_remove(
-              student_cache[id].enrolled_courses,
-              req.body
-            );
-            student_cache[id].enrolled_courses = new_e_c;
-            console.log(student_cache);
-            current_student.update({
-              enrolled_courses: firebase.firestore.FieldValue.arrayRemove(
-                req.body
-              ),
-            });
-            res.status(200).send(req.body);
-          } else res.status(400).send("Request body cannot be empty");
-        } else res.status(404).send(`Student with id ${id} does not exist`);
-      })
-      .catch((err) => console.error(err));
-  } catch (err) {
-    console.error(err);
-  }
+                    let new_e_c = array_remove(student_cache[id].enrolled_courses, req.body);
+                    student_cache[id].enrolled_courses = new_e_c;
+                    student_cache[id].transaction_history.push(transaction);
+                    // console.log(student_cache);
+                    current_student.update(
+                    {
+                        enrolled_courses: firebase.firestore.FieldValue.arrayRemove(req.body),
+                        transaction_history: firebase.firestore.FieldValue.arrayUnion(transaction)
+                    });
+                    res.status(200).send({ course: req.body, transaction });
+                } 
+                else res.status(400).send("Request body cannot be empty");
+            } 
+            else res.status(404).send(`Student with id ${id} does not exist`);
+        })
+        .catch((err) => console.error(err));
+    } 
+    catch(err) 
+    {
+        console.error(err);
+    }
 });
 
 /**
@@ -213,62 +235,68 @@ router.put("/:id/removecourse", async (req, res) => {
  *
  * Takes in student id as parameter, and an array containing two course JSON objects as the request body
  *
- * Returns: course objects to be swapped
+ * Returns: course objects to be swapped and the transaction
  *
  * Return status:
  * 200 - OK: swapping successful
  * 400 - Bad Request: invalid request body format
  * 404 - Not Found: user id does not exist on database
  */
-router.put("/:id/swapcourses", async (req, res) => {
-  const { id } = req.params;
-  const prev_course = req.body[0];
-  const new_course = req.body[1];
+router.put("/:id/swapcourses", async (req, res) => 
+{
+    const { id } = req.params;
+    const prev_course = req.body[0];
+    const new_course = req.body[1];
 
-  let current_student = db.collection("Students").doc(id);
+    let current_student = db.collection("Students").doc(id);
 
-  console.log(prev_course);
-  console.log(new_course);
+    // console.log(prev_course);
+    // console.log(new_course);
 
-  try {
-    await current_student
-      .get()
-      .then((doc) => {
-        if (doc.exists) {
-          if (
-            req.body.constructor === Array &&
-            Object.keys(req.body).length === 2
-          ) {
-            let cached_enrolled_course = array_remove(
-              student_cache[id].enrolled_courses,
-              prev_course
-            );
-            student_cache[id].enrolled_courses = cached_enrolled_course;
-            student_cache[id].enrolled_courses.push(new_course);
-            current_student.update({
-              enrolled_courses: firebase.firestore.FieldValue.arrayRemove(
-                prev_course
-              ),
-            });
+    try 
+    {
+        await current_student.get()
+        .then((doc) => 
+        {
+            if (doc.exists) 
+            {
+                if (req.body.constructor === Array && Object.keys(req.body).length === 2) 
+                {
+                    let transaction =
+                    {
+                        action: "SWAP_COURSES",
+                        date: new Date().toISOString(),
+                        package: req.body
+                    };
 
-            current_student.update({
-              enrolled_courses: firebase.firestore.FieldValue.arrayUnion(
-                new_course
-              ),
-            });
-            res.status(200).send(req.body);
-          } else
-            res
-              .status(400)
-              .send(
-                "Invalid request body: expecting an array that contains two JSON objects"
-              );
-        } else res.status(404).send(`Student with id ${id} does not exist`);
-      })
-      .catch((err) => console.error(err));
-  } catch (err) {
-    console.error(err);
-  }
+                    let cached_enrolled_course = array_remove(student_cache[id].enrolled_courses, prev_course);
+
+                    student_cache[id].enrolled_courses = cached_enrolled_course;
+                    student_cache[id].enrolled_courses.push(new_course);
+                    student_cache[id].transaction_history.push(transaction);
+
+                    current_student.update(
+                    {
+                        enrolled_courses: firebase.firestore.FieldValue.arrayRemove(prev_course),
+                    });
+
+                    current_student.update(
+                    {
+                        enrolled_courses: firebase.firestore.FieldValue.arrayUnion(new_course),
+                        transaction_history: firebase.firestore.FieldValue.arrayUnion(transaction)
+                    });
+                    res.status(200).send({ courses: req.body, transaction });
+                } 
+                else res.status(400).send("Invalid request body: expecting an array that contains two JSON objects");
+            } 
+            else res.status(404).send(`Student with id ${id} does not exist`);
+        })
+        .catch((err) => console.error(err));
+    } 
+    catch(err) 
+    {
+        console.error(err);
+    }
 });
 //Utility functions
 function is_empty(obj) {
