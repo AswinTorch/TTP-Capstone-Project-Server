@@ -208,7 +208,7 @@ router.put("/:id/removecourse", async (req, res) => {
  * Swapping courses
  *
  * PUT new course in place of the old one
- * /api/students/:id/swapcourse
+ * /api/students/:id/swapcourses
  *
  * Takes in student id as parameter, and an array containing two course JSON objects as the request body
  *
@@ -219,7 +219,7 @@ router.put("/:id/removecourse", async (req, res) => {
  * 400 - Bad Request: invalid request body format
  * 404 - Not Found: user id does not exist on database
  */
-router.put("/:id/swapcourse", async (req, res) => {
+router.put("/:id/swapcourses", async (req, res) => {
   const { id } = req.params;
   const prev_course = req.body[0];
   const new_course = req.body[1];
@@ -255,7 +255,7 @@ router.put("/:id/swapcourse", async (req, res) => {
                 new_course
               ),
             });
-            res.status(200).send(doc.data());
+            res.status(200).send(req.body);
           } else
             res
               .status(400)
