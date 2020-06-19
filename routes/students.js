@@ -84,6 +84,7 @@ router.post("/", async (req, res) => {
     last_name: lastName,
     email: email,
     enrolled_courses: [],
+    transaction_history: []
   };
 
   try {
@@ -212,7 +213,7 @@ router.put("/:id/removecourse", async (req, res) => {
  *
  * Takes in student id as parameter, and an array containing two course JSON objects as the request body
  *
- * Returns: updated student object
+ * Returns: course objects to be swapped
  *
  * Return status:
  * 200 - OK: swapping successful
