@@ -22,8 +22,8 @@ const { doc } = require("./db");
  * 404 - Not found: id does not exist on database
  */
 //this is 15 mins in millisecond : this is to flush the cache 
-// let TIMER = 900000;
-let TIMER = 10000;
+let TIMER = 900000;
+// let TIMER = 10000;
 let student_cache = {};
 //CACHE_TIMER the last
 let CACHE_TIMER = {};
