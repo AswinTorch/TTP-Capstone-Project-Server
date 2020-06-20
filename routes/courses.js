@@ -160,14 +160,14 @@ router.get("/search", async (req, res, next) => {
       for (let i in course_cache) {
         if (
           levensthein_ratio(
-            `${course_cache[i].course_identifier} ${course_cache[i].course_number}`,
-            search_string
-          ) > 0.20
+            (`${course_cache[i].course_identifier}${course_cache[i].course_number}`).toLowerCase(),
+            (search_string.replace(/\s/g, "").toLowerCase())
+          ) > 0.2
         ) {
           search_result.push({
             data: course_cache[i],
             distance: levensthein_ratio(
-              `${course_cache[i].course_identifier} ${course_cache[i].course_number}`,
+              `${course_cache[i].course_identifier}${course_cache[i].course_number.replace(/\s/g,"")}`,
               search_string
             ),
           });
