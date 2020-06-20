@@ -20,6 +20,7 @@ const { doc } = require("./db");
  * 404 - Not found: id does not exist on database
  */
 student_cache = {};
+
 router.get("/:id", async (req, res) => {
   const { id } = req.params;
   if (is_empty(student_cache)) {
