@@ -22,7 +22,8 @@ const { doc } = require("./db");
  * 404 - Not found: id does not exist on database
  */
 //this is 15 mins in millisecond : this is to flush the cache 
-let TIMER = 900000;
+// let TIMER = 900000;
+let TIMER = 10000;
 let student_cache = {};
 //CACHE_TIMER the last
 let CACHE_TIMER = {};
@@ -338,7 +339,7 @@ router.put("/:id/swapcourses", async (req, res) => {
 
 setInterval(function () {
   if (!is_empty(CACHE_TIMER)) {
-    const flushCache = () => {
+    const flushCache = async() => {
       return new Promise((res) => {
         const current_time = new Date();
         const to_delete = [];
