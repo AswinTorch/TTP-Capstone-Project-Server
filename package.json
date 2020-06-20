@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "node ./bin/www",
+    "start": "npm start",
     "dev": "PORT=3001 npx nodemon start"
   },
   "dependencies": {
