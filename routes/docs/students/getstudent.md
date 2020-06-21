@@ -28,7 +28,7 @@ Returns the student object associated with the uid
 
 **Status Code:** `404 Not Found`
 
-**Response Message:** `Student with id ${id} does not exist`
+**Response Message:** `Student with id ${uid} does not exist`
 
 ### Sample Call
 ```js
