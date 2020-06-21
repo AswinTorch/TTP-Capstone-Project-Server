@@ -1,6 +1,12 @@
 # Get a Student's Account
-![](https://img.shields.io/badge/%2Fapi%2Fstudents%2F%3Aid-GET-brightgreen?style=flat-square)
-Returns the student object associated with the id
+![](https://img.shields.io/badge/%2Fapi%2Fstudents%2F%3Auid-GET-brightgreen?style=flat-square)
+Returns the student object associated with the uid
+
+**URL Params:**
+- Required: `uid=[string]`
+
+**Data Params:**
+- None
 
 ### Success Response
 **Status Code:** `200 OK`
@@ -23,3 +29,10 @@ Returns the student object associated with the id
 **Status Code:** `404 Not Found`
 
 **Response Message:** `Student with id ${id} does not exist`
+
+### Sample Call
+```js
+axios.get(`/api/students/${uid}`)
+.then((res) => console.log(res.data))
+.catch((err) => console.error(err));
+```
