@@ -27,16 +27,25 @@ Returns the course object that was added, along with a transaction object associ
 **Response Content:**
 ```json
 {
-    campus_name: "Brooklyn College",
-    career: "Undergraduate",
-    course_identifier: "CISC",
-    course_name: "Multimedia Computing",
-    course_number: "3630",
-    department: "Computer & Information Science",
-    description: "(Prior to Fall 2010, this course was known as CIS 52.nThe information below might still reflect the old course numbers. Bracketed numbers, if any, are the old course numbers. Learn more...)",
-    lecturer: ["Professor 1", "Professor 2", "Professor 3"],
-    semester_offered: "Fall, Spring",
-    units: "4.00"
+    course:
+    {
+        campus_name: "Brooklyn College",
+        career: "Undergraduate",
+        course_identifier: "CISC",
+        course_name: "Multimedia Computing",
+        course_number: "3630",
+        department: "Computer & Information Science",
+        description: "(Prior to Fall 2010, this course was known as CIS 52.nThe information below might still reflect the old course numbers. Bracketed numbers, if any, are the old course numbers. Learn more...)",
+        lecturer: ["Professor 1", "Professor 2", "Professor 3"],
+        semester_offered: "Fall, Spring",
+        units: "4.00"
+    },
+    transaction:
+    {
+        action: "ADD_COURSE",
+        date: "2020-06-21T16:55:50.374Z",
+        package: [the added course object]
+    }
 }
 ```
 
