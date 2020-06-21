@@ -22,7 +22,7 @@ Returns the course object that was added, along with a transaction object associ
 ```
 
 ### Success Response
-**Status Code:** `200 OK`
+**Status Code:** `201 Created`
 
 **Response Content:**
 ```json
