@@ -31,7 +31,7 @@ let CACHE_TIMER = {};
 router.get("/:id", async (req, res) => {
   const { id } = req.params;
   const ip = crypto
-    .SHA256(req.headers["x-real-ip"] || req.connection.remoteAddress)
+    .SHA256(req.headers['cf-connecting-ip'] || req.headers["x-forwarded-for"] || req.connection.remoteAddress)
     .toString();
   let current_time = new Date();
   if (is_empty(student_cache)) {
@@ -46,7 +46,7 @@ router.get("/:id", async (req, res) => {
           else {
             student_cache[doc.id] = doc.data();
             CACHE_TIMER[ip] = [doc.id, current_time];
-            console.log(CACHE_TIMER);
+            // console.log(CACHE_TIMER);
             console.log("line 35:::from db");
             res.status(200).send(doc.data());
           }
@@ -96,8 +96,9 @@ router.get("/:id", async (req, res) => {
 router.post("/", async (req, res) => {
   const { uid, firstName, lastName, email } = req.body;
   const ip = crypto
-    .SHA256(req.headers["x-real-ip"] || req.connection.remoteAddress)
+    .SHA256(req.headers['cf-connecting-ip'] ||req.headers["x-forwarded-for"] || req.connection.remoteAddress)
     .toString();
+    let current_time = new Date();
   let newStudentObj = {
     uid: uid,
     first_name: firstName,
@@ -148,7 +149,7 @@ router.put("/:id/addcourse", async (req, res) => {
 
   let current_student = db.collection("Students").doc(id);
   const ip = crypto
-    .SHA256(req.headers["x-real-ip"] || req.connection.remoteAddress)
+    .SHA256(req.headers['cf-connecting-ip'] ||req.headers["x-forwarded-for"] || req.connection.remoteAddress)
     .toString();
   const current_time = new Date();
   try {
@@ -208,7 +209,7 @@ router.put("/:id/removecourse", async (req, res) => {
 
   let current_student = db.collection("Students").doc(id);
   const ip = crypto
-    .SHA256(req.headers["x-real-ip"] || req.connection.remoteAddress)
+    .SHA256(req.headers['cf-connecting-ip'] || req.headers["x-forwarded-for"] || req.connection.remoteAddress)
     .toString();
   // console.log("body:", req.body);
   const current_time = new Date();
@@ -275,7 +276,7 @@ router.put("/:id/swapcourses", async (req, res) => {
   const prev_course = req.body[0];
   const new_course = req.body[1];
   const ip = crypto
-    .SHA256(req.headers["x-real-ip"] || req.connection.remoteAddress)
+    .SHA256(req.headers['cf-connecting-ip'] || req.headers["x-forwarded-for"] || req.connection.remoteAddress)
     .toString();
   let current_time = new Date();
 
@@ -336,8 +337,11 @@ router.put("/:id/swapcourses", async (req, res) => {
     console.error(err);
   }
 });
-
-setInterval(function () {
+async function delay(ms) {
+  return await new Promise((resolve) => setTimeout(resolve, ms));
+}
+async function run(){ 
+  await delay(10000);  
   if (!is_empty(CACHE_TIMER)) {
     const flushCache = async() => {
       return new Promise((res) => {
@@ -359,9 +363,10 @@ setInterval(function () {
         }
       });
     };
-    flushCache().then(() => {});
+    flushCache().then(() => {console.log("42")});
   }
-}, 10000);
+}
+run();
 //Utility functions
 function is_empty(obj) {
   for (let key in obj) {
@@ -369,6 +374,7 @@ function is_empty(obj) {
   }
   return true;
 }
+
 function array_remove(arr, value) {
   let return_value = [];
   for (let i of arr) {
