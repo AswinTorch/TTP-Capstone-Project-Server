@@ -2,7 +2,6 @@ var express = require("express");
 var router = express.Router();
 var firebase = require("firebase");
 var db = require("./db");
-
 var comment_cache = {};
 
 router.get("/getComments", async (req, res, next) => {
