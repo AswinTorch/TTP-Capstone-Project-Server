@@ -1,5 +1,5 @@
 # Get a Student's Account
-![](https://img.shields.io/badge/%2Fapi%2Fstudents%2F%3Auid-GET-brightgreen?style=flat-square)&nbsp;
+![](https://img.shields.io/badge/%2Fapi%2Fstudents%2F%3Auid-GET-brightgreen?style=flat-square)\
 Returns the student object associated with the uid
 
 **URL Params:**
