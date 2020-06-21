@@ -1,5 +1,7 @@
 # Create a New Student Account
-![](https://img.shields.io/badge/%2Fapi%2Fstudents-POST-blue?style=flat-square)
+![](https://img.shields.io/badge/%2Fapi%2Fstudents-POST-blue?style=flat-square)\
+Creates a new student object using information from the request body, along with empty arrays for enrolled classes and transaction history.
+
 Returns the newly created student object
 
 **URL Params:**
@@ -8,10 +10,10 @@ Returns the newly created student object
 **Data Params:**
 ```json
 {
-    firstName: "First Name",
-    lastName: "Last Name",
-    email: "Email Address",
-    uid: "Auto-Generated Unique User ID"
+    "firstName": "First Name",
+    "lastName": "Last Name",
+    "email": "Email Address",
+    "uid": "Auto-Generated Unique User ID"
 }
 ```
 
@@ -21,12 +23,12 @@ Returns the newly created student object
 **Response Content:**
 ```json
 {
-    firstName: "First Name",
-    lastName: "Last Name",
-    email: "Email Address",
-    enrolled_courses: [],
-    transaction_history: [],
-    uid: "Auto-Generated Unique User ID"
+    "firstName": "First Name",
+    "lastName": "Last Name",
+    "email": "Email Address",
+    "enrolled_courses": [],
+    "transaction_history": [],
+    "uid": "Auto-Generated Unique User ID"
 }
 ```
 
