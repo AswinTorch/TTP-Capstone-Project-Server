@@ -31,7 +31,7 @@ Returns the course object that was removed, along with a transaction object asso
 {
     "course":
     {
-       "campus_name": "Brooklyn College",
+        "campus_name": "Brooklyn College",
         "career": "Undergraduate",
         "course_identifier": "CISC",
         "course_name": "Multimedia Computing",

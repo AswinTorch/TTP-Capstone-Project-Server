@@ -17,25 +17,4 @@ An attempt to make a responsive, student-oriented application similar to the CUN
 [Swapping Courses in Student's Account]()\
 ![](https://img.shields.io/badge/%2Fapi%2Fstudents%2F%3Auid%2Fswapcourses-PUT-orange?style=flat-square)
 
-```js
-/**
- * Swapping courses
- *
- * PUT new course in place of the old one
- * /api/students/:id/swapcourses
- *
- * Takes in student id as parameter, and an array containing two course JSON objects as the request body
- *
- * Returns: course objects to be swapped and the transaction
- *
- * Return status:
- * 200 - OK: swapping successful
- * 400 - Bad Request: invalid request body format
- * 404 - Not Found: user id does not exist on database
- */
-axios.put(`/api/students/${uid}/swapcourses`, [prevCourse, newCourse])
-.then((res) => console.log(res.data))
-.catch((err) => console.error(err));
-```
-
 ## Courses Endpoints
