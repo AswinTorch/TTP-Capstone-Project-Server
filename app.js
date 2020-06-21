@@ -6,12 +6,14 @@ var logger = require("morgan");
 var indexRouter = require("./routes/index");
 const { env } = require("process");
 const helmet = require("helmet");
-
 var app = express();
+var cors = require("cors");
+app.use(cors());
 require("dotenv").config();
-app.use(helmet())
+app.use(helmet());
 app.use(logger("dev"));
-app.use(express.json({type:"*/*"}));
+app.set("trust proxy", true);
+app.use(express.json({ type: "*/*" }));
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
@@ -27,7 +29,19 @@ app.use("/api", indexRouter);
 //   })
 // })
 
+var whitelist = ["https://ttp-capstone-project.web.app/"];
+var corsOptions = {
+  origin: function (origin, callback) {
+    if (whitelist.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
+};
 
+// Then pass them to cors:
+app.use(cors(corsOptions));
 //// error handling
 app.use((req, res, next) => {
   if (path.extname(req.path).length) {
