@@ -8,7 +8,7 @@ Returns an object containing an array of course objects, with the amount equal t
 **Data Params:**
 - None
 
-### Success Response
+## Success Response
 **Status Code:** `200 OK`
 
 **Response Content:**
@@ -47,7 +47,7 @@ Returns an object containing an array of course objects, with the amount equal t
 }
 ```
 
-### Error Response
+## Error Response
 **Condition:** If the `Courses` collection does not exist on the database
 
 **Status Code:** `404 Not Found`
@@ -60,7 +60,7 @@ An empty data array would be returned if an invalid query has been submitted
 }
 ```
 
-### Sample Call
+## Sample Call
 ```js
 axios.get("/api/courses?limit=50")
 .then((res) => console.log(res.data.data))

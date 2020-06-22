@@ -37,7 +37,7 @@ Returns the two course objects that were swapped, along with a transaction objec
 ]
 ```
 
-### Success Response
+## Success Response
 **Status Code:** `200 OK`
 
 **Response Content:**
@@ -53,7 +53,7 @@ Returns the two course objects that were swapped, along with a transaction objec
 }
 ```
 
-### Error Response
+## Error Response
 **Condition:**
 - If the request body format is invalid
 - If the user ID does not exist on the database
@@ -66,7 +66,7 @@ Returns the two course objects that were swapped, along with a transaction objec
 - `Invalid request body: expecting an array that contains two JSON objects`
 - `Student with id ${uid} does not exist`
 
-### Sample Call
+## Sample Call
 ```js
 axios.put(`/api/students/${uid}/swapcourses`, [prevCourse, newCourse])
 .then((res) => console.log(res.data))
