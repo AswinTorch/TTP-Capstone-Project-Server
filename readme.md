@@ -25,16 +25,16 @@ An attempt to make a responsive, student-oriented application similar to the CUN
 ![](https://img.shields.io/badge/%2Fapi%2Fcourses/search-GET-brightgreen?style=flat-square)
 
 ~~[Get Course by ID]()~~ **[Deprecated]**\
-![](https://img.shields.io/badge/%2Fapi%2Fcourses%2Fid%2F%3Auid-GET-lightgrey?style=flat-square)
-Soon to be replaced by
+![](https://img.shields.io/badge/%2Fapi%2Fcourses%2Fid%2F%3Auid-GET-lightgrey?style=flat-square)\
+Soon to be replaced by\
 ![](https://img.shields.io/badge/%2Fapi%2Fcourses%2F%3Auid-GET-green?style=flat-square)
 
 ~~[Get All Departments]()~~ **[Deprecated]**\
-![](https://img.shields.io/badge/%2Fapi%2Fcourses%2FallDepartment-GET-lightgrey?style=flat-square)
-Soon to be replaced by
+![](https://img.shields.io/badge/%2Fapi%2Fcourses%2FallDepartment-GET-lightgrey?style=flat-square)\
+Soon to be replaced by\
 ![](https://img.shields.io/badge/%2Fapi%2Fcourses%2Fdepartments-GET-green?style=flat-square)
 
 ~~[Get Department by Name]()~~ **[Deprecated]**\
-![](https://img.shields.io/badge/%2Fapi%2Fcourses%2FallDepartment%2F%3AdptName-GET-lightgrey?style=flat-square)
-Soon to be replaced by
+![](https://img.shields.io/badge/%2Fapi%2Fcourses%2FallDepartment%2F%3AdptName-GET-lightgrey?style=flat-square)\
+Soon to be replaced by\
 ![](https://img.shields.io/badge/%2Fapi%2Fcourses%2Fdepartments%2F%3AdptId-GET-green?style=flat-square)
