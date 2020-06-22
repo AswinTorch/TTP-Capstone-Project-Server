@@ -17,7 +17,7 @@ Returns the newly created student object
 }
 ```
 
-### Success Response
+## Success Response
 **Status Code:** `201 Created`
 
 **Response Content:**
@@ -32,14 +32,14 @@ Returns the newly created student object
 }
 ```
 
-### Error Response
+## Error Response
 **Condition:** If request body does not have enough information to create a new student
 
 **Status Code:** `400 Bad Request`
 
 **Response Message:** `Error posting new student. Be sure to include a uid, first_name, last_name, and email.`
 
-### Sample Call
+## Sample Call
 ```js
 axios.post("/api/students", student)
 .then((res) => console.log(res.data))

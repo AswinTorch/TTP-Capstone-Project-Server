@@ -23,7 +23,7 @@ Returns the course object that was added, along with a transaction object associ
 }
 ```
 
-### Success Response
+## Success Response
 **Status Code:** `201 Created`
 
 **Response Content:**
@@ -51,7 +51,7 @@ Returns the course object that was added, along with a transaction object associ
 }
 ```
 
-### Error Response
+## Error Response
 **Condition:** 
 - If request body is empty
 - If the user ID does not exist on the database
@@ -64,7 +64,7 @@ Returns the course object that was added, along with a transaction object associ
 - `Request body cannot be empty`
 - `Student with id ${uid} does not exist`
 
-### Sample Call
+## Sample Call
 ```js
 axios.put(`/api/students/${uid}/addcourse`, course)
 .then((res) => console.log(res.data))

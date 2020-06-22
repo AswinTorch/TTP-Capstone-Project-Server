@@ -8,7 +8,7 @@ Returns the student object associated with the uid
 **Data Params:**
 - None
 
-### Success Response
+## Success Response
 **Status Code:** `200 OK`
 
 **Response Content:**
@@ -23,14 +23,14 @@ Returns the student object associated with the uid
 }
 ```
 
-### Error Response
+## Error Response
 **Condition:** If user ID does not exist on the database
 
 **Status Code:** `404 Not Found`
 
 **Response Message:** `Student with id ${uid} does not exist`
 
-### Sample Call
+## Sample Call
 ```js
 axios.get(`/api/students/${uid}`)
 .then((res) => console.log(res.data))
