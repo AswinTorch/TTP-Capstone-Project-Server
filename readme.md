@@ -38,3 +38,8 @@ Soon to be replaced by\
 ![](https://img.shields.io/badge/%2Fapi%2Fcourses%2FallDepartment%2F%3AdptName-GET-lightgrey?style=flat-square)\
 Soon to be replaced by\
 ![](https://img.shields.io/badge/%2Fapi%2Fcourses%2Fdepartments%2F%3AdptId-GET-green?style=flat-square)
+
+## Professors Endpoints
+
+[Get Comments on Professors](/routes/docs/professors/getcomments.md)\
+![](https://img.shields.io/badge/%2Fapi%2Fprofessors%2FgetComments-GET-brightgreen?style=flat-square)
