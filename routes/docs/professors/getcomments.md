@@ -1,5 +1,5 @@
 # Get Comments on Professors
-![](https://img.shields.io/badge/%2Fapi%2Fprofessors%2FgetComments-GET-brightgreen?style=flat-square)
+![](https://img.shields.io/badge/%2Fapi%2Fprofessors%2FgetComments-GET-brightgreen?style=flat-square)\
 Returns an array of comments for the specified professor.
 
 **URL Params:**
