@@ -21,8 +21,8 @@ An attempt to make a responsive, student-oriented application similar to the CUN
 [Get All Courses](/routes/docs/courses/getcourses.md)\
 ![](https://img.shields.io/badge/%2Fapi%2Fcourses-GET-brightgreen?style=flat-square)
 
-[Get Courses by Search](/routes/docs/courses/getsearchedcourses.md)\
-![](https://img.shields.io/badge/%2Fapi%2Fcourses/search-GET-brightgreen?style=flat-square)
+*[Get Courses by Search](/routes/docs/courses/getsearchedcourses.md)*\
+![](https://img.shields.io/badge/%2Fapi%2Fcourses/search-GET-green?style=flat-square) ![Deprecating](https://img.shields.io/badge/-Deprecating-red?style=flat-square)
 
 ~~[Get Course by ID]()~~ **[Deprecated]**\
 ![](https://img.shields.io/badge/%2Fapi%2Fcourses%2Fid%2F%3Auid-GET-lightgrey?style=flat-square)\
