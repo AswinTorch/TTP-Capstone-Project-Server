@@ -1,4 +1,5 @@
 const express = require("express");
+const { obj_is_empty, get_array_without_value } = require("../utility/utils");
 const router = express.Router();
 const firebase = require("firebase");
 const db = require("./db");
@@ -7,7 +8,13 @@ const crypto = require("crypto-js");
 const { debug } = require("console");
 const { send } = require("process");
 const { doc } = require("./db");
-// const { delete } = require("../app");
+
+//this is 15 mins in millisecond : this is to flush the cache
+const TIMER = 900000;
+// let TIMER = 10000;
+let student_cache = {};
+//the cache_timer is used to keep track of the last http request by a specific student
+let CACHE_TIMER = {};
 
 /*
  * GET student object from their id
@@ -21,20 +28,14 @@ const { doc } = require("./db");
  * 200 - OK: student found on database
  * 404 - Not found: id does not exist on database
  */
-//this is 15 mins in millisecond : this is to flush the cache 
-let TIMER = 900000;
-// let TIMER = 10000;
-let student_cache = {};
-//CACHE_TIMER the last
-let CACHE_TIMER = {};
 
 router.get("/:id", async (req, res) => {
   const { id } = req.params;
-  const ip = crypto
-    .SHA256(req.headers['cf-connecting-ip'] || req.headers["x-forwarded-for"] || req.connection.remoteAddress)
+  const hashed_ip = crypto
+    .SHA256(req.headers["x-real-ip"] || req.connection.remoteAddress)
     .toString();
   let current_time = new Date();
-  if (is_empty(student_cache)) {
+  if (obj_is_empty(student_cache)) {
     try {
       await db
         .collection("Students")
@@ -45,8 +46,8 @@ router.get("/:id", async (req, res) => {
             res.status(404).send(`Student with id ${id} does not exist`);
           else {
             student_cache[doc.id] = doc.data();
-            CACHE_TIMER[ip] = [doc.id, current_time];
-            // console.log(CACHE_TIMER);
+            CACHE_TIMER[hashed_ip] = [doc.id, current_time];
+            console.log(CACHE_TIMER);
             console.log("line 35:::from db");
             res.status(200).send(doc.data());
           }
@@ -62,7 +63,7 @@ router.get("/:id", async (req, res) => {
         .send(`Student with id : ${id} does not exist in the cache`);
     } else {
       console.log("line 43::cached data was sent");
-      CACHE_TIMER[ip] = [id, current_time];
+      CACHE_TIMER[hashed_ip] = [id, current_time];
       console.log(CACHE_TIMER);
       res.status(200).send(student_cache[id]);
     }
@@ -95,10 +96,9 @@ router.get("/:id", async (req, res) => {
  */
 router.post("/", async (req, res) => {
   const { uid, firstName, lastName, email } = req.body;
-  const ip = crypto
-    .SHA256(req.headers['cf-connecting-ip'] ||req.headers["x-forwarded-for"] || req.connection.remoteAddress)
+  const hashed_ip = crypto
+    .SHA256(req.headers["x-real-ip"] || req.connection.remoteAddress)
     .toString();
-    let current_time = new Date();
   let newStudentObj = {
     uid: uid,
     first_name: firstName,
@@ -117,7 +117,7 @@ router.post("/", async (req, res) => {
       .set(newStudentObj)
       .then(() => {
         student_cache[uid] = newStudentObj;
-        CACHE_TIMER[ip] = [doc.id, current_time];
+        CACHE_TIMER[hashed_ip] = [doc.id, current_time];
         console.log(CACHE_TIMER);
         res.status(201).send(student_cache[uid]);
       })
@@ -146,10 +146,9 @@ router.post("/", async (req, res) => {
  */
 router.put("/:id/addcourse", async (req, res) => {
   const { id } = req.params;
-
   let current_student = db.collection("Students").doc(id);
-  const ip = crypto
-    .SHA256(req.headers['cf-connecting-ip'] ||req.headers["x-forwarded-for"] || req.connection.remoteAddress)
+  const hashed_ip = crypto
+    .SHA256(req.headers["x-real-ip"] || req.connection.remoteAddress)
     .toString();
   const current_time = new Date();
   try {
@@ -166,11 +165,8 @@ router.put("/:id/addcourse", async (req, res) => {
               date: new Date().toISOString(),
               package: req.body,
             };
-
-            // console.log(student_cache);
             student_cache[id].enrolled_courses.push(req.body);
             student_cache[id].transaction_history.push(transaction);
-            // console.log(student_cache);
             current_student.update({
               enrolled_courses: firebase.firestore.FieldValue.arrayUnion(
                 req.body
@@ -179,7 +175,7 @@ router.put("/:id/addcourse", async (req, res) => {
                 transaction
               ),
             });
-            CACHE_TIMER[ip] = [id, current_time];
+            CACHE_TIMER[hashed_ip] = [id, current_time];
             console.log(CACHE_TIMER);
             res.status(201).send({ course: req.body, transaction });
           } else res.status(400).send("Request body cannot be empty");
@@ -206,12 +202,10 @@ router.put("/:id/addcourse", async (req, res) => {
  */
 router.put("/:id/removecourse", async (req, res) => {
   const { id } = req.params;
-
   let current_student = db.collection("Students").doc(id);
-  const ip = crypto
-    .SHA256(req.headers['cf-connecting-ip'] || req.headers["x-forwarded-for"] || req.connection.remoteAddress)
+  const hashed_ip = crypto
+    .SHA256(req.headers["x-real-ip"] || req.connection.remoteAddress)
     .toString();
-  // console.log("body:", req.body);
   const current_time = new Date();
   try {
     await current_student
@@ -222,20 +216,18 @@ router.put("/:id/removecourse", async (req, res) => {
             req.body.constructor === Object &&
             Object.keys(req.body).length > 0
           ) {
-            // console.log(student_cache[id].enrolled_courses);
             let transaction = {
               action: "DROP_COURSE",
               date: new Date().toISOString(),
               package: req.body,
             };
 
-            let new_e_c = array_remove(
+            let new_e_c = get_array_without_value(
               student_cache[id].enrolled_courses,
               req.body
             );
             student_cache[id].enrolled_courses = new_e_c;
             student_cache[id].transaction_history.push(transaction);
-            // console.log(student_cache);
             current_student.update({
               enrolled_courses: firebase.firestore.FieldValue.arrayRemove(
                 req.body
@@ -244,8 +236,7 @@ router.put("/:id/removecourse", async (req, res) => {
                 transaction
               ),
             });
-            CACHE_TIMER[ip] = [id, current_time];
-            console.log(CACHE_TIMER);
+            CACHE_TIMER[hashed_ip] = [id, current_time];
             res.status(200).send({ course: req.body, transaction });
           } else res.status(400).send("Request body cannot be empty");
         } else res.status(404).send(`Student with id ${id} does not exist`);
@@ -275,14 +266,11 @@ router.put("/:id/swapcourses", async (req, res) => {
   const { id } = req.params;
   const prev_course = req.body[0];
   const new_course = req.body[1];
-  const ip = crypto
-    .SHA256(req.headers['cf-connecting-ip'] || req.headers["x-forwarded-for"] || req.connection.remoteAddress)
+  const hashed_ip = crypto
+    .SHA256(req.headers["x-real-ip"] || req.connection.remoteAddress)
     .toString();
   let current_time = new Date();
-
   let current_student = db.collection("Students").doc(id);
-  // console.log(prev_course);
-  // console.log(new_course);
   try {
     await current_student
       .get()
@@ -297,22 +285,18 @@ router.put("/:id/swapcourses", async (req, res) => {
               date: new Date().toISOString(),
               package: req.body,
             };
-
-            let cached_enrolled_course = array_remove(
+            let cached_enrolled_course = get_array_without_value(
               student_cache[id].enrolled_courses,
               prev_course
             );
-
             student_cache[id].enrolled_courses = cached_enrolled_course;
             student_cache[id].enrolled_courses.push(new_course);
             student_cache[id].transaction_history.push(transaction);
-
             current_student.update({
               enrolled_courses: firebase.firestore.FieldValue.arrayRemove(
                 prev_course
               ),
             });
-
             current_student.update({
               enrolled_courses: firebase.firestore.FieldValue.arrayUnion(
                 new_course
@@ -321,8 +305,7 @@ router.put("/:id/swapcourses", async (req, res) => {
                 transaction
               ),
             });
-            CACHE_TIMER[ip] = [id, current_time];
-            console.log(CACHE_TIMER);
+            CACHE_TIMER[hashed_ip] = [id, current_time];
             res.status(200).send({ courses: req.body, transaction });
           } else
             res
@@ -337,13 +320,10 @@ router.put("/:id/swapcourses", async (req, res) => {
     console.error(err);
   }
 });
-async function delay(ms) {
-  return await new Promise((resolve) => setTimeout(resolve, ms));
-}
-async function run(){ 
-  await delay(10000);  
-  if (!is_empty(CACHE_TIMER)) {
-    const flushCache = async() => {
+
+setInterval(function () {
+  if (!obj_is_empty(CACHE_TIMER)) {
+    const flushCache = async () => {
       return new Promise((res) => {
         const current_time = new Date();
         const to_delete = [];
@@ -352,7 +332,7 @@ async function run(){
             console.log(`Deleting ${CACHE_TIMER[i][0]} from the cache`);
             delete student_cache[CACHE_TIMER[i][0]];
             to_delete.push(i);
-          } 
+          }
         }
         if (to_delete.length !== 0) {
           to_delete.forEach((i) => {
@@ -363,39 +343,8 @@ async function run(){
         }
       });
     };
-    flushCache().then(() => {console.log("42")});
+    flushCache().then(() => {});
   }
-}
-run();
-//Utility functions
-function is_empty(obj) {
-  for (let key in obj) {
-    if (obj.hasOwnProperty(key)) return false;
-  }
-  return true;
-}
+}, 10000);
 
-function array_remove(arr, value) {
-  let return_value = [];
-  for (let i of arr) {
-    if (!_.isEqual(i, value)) {
-      return_value.push(i);
-    }
-  }
-  return return_value;
-}
-// function is_equivalent(a, b) {
-//   var a_property = Object.getOwnPropertyNames(a);
-//   var b_property = Object.getOwnPropertyNames(b);
-//   if (a_property.length != b_property.length) {
-//     return false;
-//   }
-//   for (var i = 0; i < a_property.length; i++) {
-//     var prop_name = a_property[i];
-//     if (a[prop_name] !== b[prop_name]) {
-//       return false;
-//     }
-//   }
-//   return true;
-// }
 module.exports = router;
