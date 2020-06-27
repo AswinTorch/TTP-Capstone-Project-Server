@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const db = require("./db");
 const levensthein_ratio = require("../utility/levensthein");
-
+const { get_obj_slice, obj_is_empty } = require("../utility/utils");
 /**
  * GET all courses
  * /api/courses
@@ -20,7 +20,7 @@ course_cache = {};
 router.get("/", async (req, res, next) => {
   const { limit } = req.query;
   // const ind
-  if (is_empty(course_cache)) {
+  if (obj_is_empty(course_cache)) {
     try {
       await db
         .collection("Courses")
@@ -60,7 +60,7 @@ router.get("/", async (req, res, next) => {
 //id:: GEt data by id number
 router.get("/id/:id", async (req, res, next) => {
   const { id } = req.params;
-  if (is_empty(course_cache)) {
+  if (obj_is_empty(course_cache)) {
     try {
       var return_value = await db
         .collection("Courses")
@@ -90,7 +90,7 @@ router.get("/id/:id", async (req, res, next) => {
 // Deparment
 // will send the list of all the departments available within the courses
 router.get("/allDepartment", async (req, res, next) => {
-  if (is_empty(course_cache)) {
+  if (obj_is_empty(course_cache)) {
     try {
       var return_val = await db
         .collection("Courses")
@@ -123,7 +123,7 @@ router.get("/allDepartment", async (req, res, next) => {
 });
 router.get("/allDepartment/:dptName", async (req, res, next) => {
   const { dptName } = req.params;
-  if (is_empty(course_cache)) {
+  if (obj_is_empty(course_cache)) {
     try {
       var return_val = await db
         .collection("Courses")
@@ -155,7 +155,7 @@ router.get("/allDepartment/:dptName", async (req, res, next) => {
 router.get("/search", async (req, res, next) => {
   const { search_string } = req.query;
   console.log(search_string.split(" ").length);
-  if (!is_empty(course_cache)) {
+  if (!obj_is_empty(course_cache)) {
     let search_result = [];
       for (let i in course_cache) {
         if (
@@ -182,24 +182,7 @@ router.get("/search", async (req, res, next) => {
     res.status(500).send("not there");
 }
 });
-//Utility functions
-function is_empty(obj) {
-  for (var key in obj) {
-    if (obj.hasOwnProperty(key)) return false;
-  }
-  return true;
-}
-//Utility function
-function get_obj_slice(obj, limit) {
-  let return_list = [];
-  let keys = Object.keys(obj);
-  // console.log(keys)
-  for (let i = 0; i < limit; i++) {
-    // console.log(keys[i])
-    return_list.push(obj[keys[i]]);
-  }
-  return return_list;
-}
+
 function get_all_department(obj) {
   let department_set = new Set();
   for (let i in obj) {
