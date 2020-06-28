@@ -9,7 +9,7 @@ import * as env from "process";
 import * as helmet from "helmet";
 import * as dotenv from "dotenv";
 import * as cors from "cors";
-interface Error {
+export interface Error {
   status?: number;
   stack?: any;
   message?: string;
