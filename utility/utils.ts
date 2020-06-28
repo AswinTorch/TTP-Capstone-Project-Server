@@ -1,4 +1,5 @@
-function obj_is_empty(obj) {
+import * as _ from 'lodash';
+export function obj_is_empty(obj: object): boolean {
     /*
      *Returns true if the obj is empty else
      *Returns false
@@ -9,7 +10,7 @@ function obj_is_empty(obj) {
   return true;
 }
 
-function get_array_without_value(arr, value) {
+export function get_array_without_value(arr:Array<any>, value:any) : Array<any> {
     /*
      *Returns an arrays that is without the given value 
     */
@@ -21,15 +22,14 @@ function get_array_without_value(arr, value) {
   }
   return return_value;
 }
-function get_obj_slice(obj, limit) {
+export function get_obj_slice(obj:object, limit:number):Array<any> {
     /*
     *Returns limit(number) of items in obj 
     */
-  let return_list = [];
-  let keys = Object.keys(obj);
+  let return_list : Array<any> = [];
+  let keys : any = Object.keys(obj);
   for (let i = 0; i < limit; i++) {
     return_list.push(obj[keys[i]]);
   }
   return return_list;
 }
-module.exports = { get_array_without_value, obj_is_empty, get_obj_slice };

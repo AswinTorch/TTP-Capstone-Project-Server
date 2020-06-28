@@ -1,11 +1,11 @@
-let levenshtein_ratio = (string_1, string_2) => {
-  rows = string_1.length + 1;
-  cols = string_2.length + 1;
-  distance = zeros([rows, cols]);
-  let ratio = 0;
-  let cost = 0;
-  for (let i = 1; i < rows; i++) {
-    for (let k = 1; k < cols; k++) {
+export function levenshtein_ratio(string_1: string, string_2: string);number{
+  const rows: number = string_1.length + 1;
+  const cols: number = string_2.length + 1;
+  let distance: Array<any> = zeros([rows, cols]);
+  let ratio: number = 0;
+  let cost: number = 0;
+  for (let i: number = 1; i < rows; i++) {
+    for (let k: number = 1; k < cols; k++) {
       distance[i][0] = i;
       distance[0][k] = k;
     }
@@ -31,14 +31,11 @@ let levenshtein_ratio = (string_1, string_2) => {
 
   return ratio * 2.0;
 };
-let zeros = (dimensions) => {
-  var array = [];
-
+function zeros(dimensions: Array<number>): Array<number> {
+  let array: Array<any> = [];
   for (var i = 0; i < dimensions[0]; ++i) {
     array.push(dimensions.length == 1 ? 0 : zeros(dimensions.slice(1)));
   }
 
   return array;
 };
-
-module.exports = levenshtein_ratio;
