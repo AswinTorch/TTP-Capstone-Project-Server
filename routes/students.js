@@ -4,7 +4,8 @@ const router = express.Router();
 const firebase = require("firebase");
 const db = require("./db");
 const crypto = require("crypto-js");
-const { doc } = require("./db");
+console.log(db)
+
 
 //this is 15 mins in millisecond : this is to flush the cache
 const TIMER = 900000;
@@ -27,6 +28,7 @@ let CACHE_TIMER = {};
  */
 
 router.get("/:id", async (req, res) => {
+  console.log(db);
   const { id } = req.params;
   const hashed_ip = crypto
     .SHA256(req.headers["x-real-ip"] || req.connection.remoteAddress)

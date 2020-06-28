@@ -1,6 +1,6 @@
-export function levenshtein_ratio(string_1: string, string_2: string);number{
-  const rows: number = string_1.length + 1;
-  const cols: number = string_2.length + 1;
+export function levenshtein_ratio(_string_1: string, _string_2: string):number{
+  const rows: number = _string_1.length + 1;
+  const cols: number = _string_2.length + 1;
   let distance: Array<any> = zeros([rows, cols]);
   let ratio: number = 0;
   let cost: number = 0;
@@ -12,7 +12,7 @@ export function levenshtein_ratio(string_1: string, string_2: string);number{
   }
   for (let col = 1; col < cols; col++) {
     for (let row = 1; row < rows; row++) {
-      if (string_1[row - 1] === string_2[col - 1]) {
+      if (_string_1[row - 1] === _string_2[col - 1]) {
         cost = 1;
       } else {
         cost = 2;
@@ -24,8 +24,8 @@ export function levenshtein_ratio(string_1: string, string_2: string);number{
         distance[row - 1][col - 1] + cost
       );
       ratio =
-        (string_1.length + string_2.length - distance[row][col]) /
-        (string_1.length + string_2.length);
+        (_string_1.length + _string_2.length - distance[row][col]) /
+        (_string_1.length + _string_2.length);
     }
   }
 
