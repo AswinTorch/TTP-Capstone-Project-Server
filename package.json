@@ -1,9 +1,9 @@
 {
   "name": "backend",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "private": true,
   "scripts": {
-    "start": "node ./bin/www",
+    "start": "ts-node ./bin/www.ts",
     "dev": "PORT=3001 npx nodemon start"
   },
   "dependencies": {
