@@ -3,10 +3,7 @@ const { obj_is_empty, get_array_without_value } = require("../utility/utils");
 const router = express.Router();
 const firebase = require("firebase");
 const db = require("./db");
-const _ = require("lodash");
 const crypto = require("crypto-js");
-const { debug } = require("console");
-const { send } = require("process");
 const { doc } = require("./db");
 
 //this is 15 mins in millisecond : this is to flush the cache
