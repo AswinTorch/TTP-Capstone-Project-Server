@@ -1,13 +1,7 @@
-// var express = require("express");
-
 import * as express from "express";
 import { Request, Response, NextFunction } from "express";
 import {Error} from "../app";
 
-// // Subrouters;
-// const coursesRouter = require("./courses");
-// const studentsRouter = require("./students");
-// const professorRouter = require("./professor");
 const router = express.Router();
 import * as coursesRouter from "./courses";
 import * as studentsRouter from "./students"

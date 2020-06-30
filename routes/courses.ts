@@ -1,8 +1,11 @@
-const express = require("express");
-const router = express.Router();
-const db = require("./db");
-const levensthein_ratio = require("../utility/levensthein");
-const { get_obj_slice, obj_is_empty } = require("../utility/utils");
+import * as express from "express";
+import { Request, Response, NextFunction } from "express";
+import { Error } from "../app";
+import * as db from "./db";
+import { obj_is_empty, get_obj_slice } from "../utility/utils";
+// import * as levenshtein_ratio  from "../utility/levensthein";
+import * as firebase from "firebase";
+
 /**
  * GET all courses
  * /api/courses
@@ -15,19 +18,20 @@ const { get_obj_slice, obj_is_empty } = require("../utility/utils");
  * 200 - OK
  * 400 - Bad Request
  */
-course_cache = {};
+const router = express.Router();
+let course_cache:object = {};
 
-router.get("/", async (req, res, next) => {
-  const { limit } = req.query;
-  // const ind
+router.get("/", async (req:Request,res:Response,next:NextFunction) => {
+  const limit: any = req.query;
+  const limit_num: number = Number(limit.limit); 
+  console.log(limit);
   if (obj_is_empty(course_cache)) {
     try {
       await db
         .collection("Courses")
         .orderBy("course_number")
         .get()
-        .then(function (snapShot) {
-          var return_list = [];
+        .then(function (snapShot) {          
           snapShot.forEach((doc) => {
             course_cache[doc.id] = doc.data();
           });
@@ -35,36 +39,36 @@ router.get("/", async (req, res, next) => {
         .catch(function (err) {
           console.log("Error on retrival :: ", err);
         });
-      var final_object = {
+      var final_object : object = {
         total_count: limit,
       };
       console.log("obj grabbed from db");
-      let return_value = {
-        data: get_obj_slice(course_cache, limit),
+      let return_value:object = {
+        data: get_obj_slice(course_cache, limit_num),
         pagination: final_object,
       };
-
       res.status(200).send(return_value);
     } catch (err) {
       next(err);
     }
   } else {
     console.log("obj grabbed from cache");
-    let return_value = {
-      data: get_obj_slice(course_cache, limit),
+    let return_value : object = {
+      data: get_obj_slice(course_cache, limit_num),
       pagination: final_object,
     };
     res.status(200).send(return_value);
   }
 });
 //id:: GEt data by id number
-router.get("/id/:id", async (req, res, next) => {
-  const { id } = req.params;
+router.get("/id/:id", async (req:Request,res:Response,next:NextFunction) => {
+  const id: any = req.params;
+  const course_id: string = id.id;
   if (obj_is_empty(course_cache)) {
     try {
       var return_value = await db
         .collection("Courses")
-        .doc(id)
+        .doc(course_id)
         .get()
         .then((doc) => {
           if (doc.exists) {
@@ -89,7 +93,7 @@ router.get("/id/:id", async (req, res, next) => {
 });
 // Deparment
 // will send the list of all the departments available within the courses
-router.get("/allDepartment", async (req, res, next) => {
+router.get("/allDepartment", async (req:Request,res:Response,next:NextFunction) => {
   if (obj_is_empty(course_cache)) {
     try {
       var return_val = await db
@@ -121,7 +125,7 @@ router.get("/allDepartment", async (req, res, next) => {
     res.status(200).json(get_all_department(course_cache));
   }
 });
-router.get("/allDepartment/:dptName", async (req, res, next) => {
+router.get("/allDepartment/:dptName", async (req:Request,res:Response,next:NextFunction) => {
   const { dptName } = req.params;
   if (obj_is_empty(course_cache)) {
     try {
@@ -152,36 +156,36 @@ router.get("/allDepartment/:dptName", async (req, res, next) => {
   }
 });
 //Search route
-router.get("/search", async (req, res, next) => {
-  const { search_string } = req.query;
-  console.log(search_string.split(" ").length);
-  if (!obj_is_empty(course_cache)) {
-    let search_result = [];
-      for (let i in course_cache) {
-        if (
-          levensthein_ratio(
-            (`${course_cache[i].course_identifier}${course_cache[i].course_number}`).toLowerCase(),
-            (search_string.replace(/\s/g, "").toLowerCase())
-          ) > 0.2
-        ) {
-          search_result.push({
-            data: course_cache[i],
-            distance: levensthein_ratio(
-              `${course_cache[i].course_identifier}${course_cache[i].course_number.replace(/\s/g,"")}`,
-              search_string
-            ),
-          });
-        }
-    }
-       search_result.sort((first, second) =>
-      first.distance < second.distance ? 1 : -1
-    );
-    res.status(200).send(search_result.slice(0, 10));
-    } 
-   else {
-    res.status(500).send("not there");
-}
-});
+// router.get("/search", async (req:Request,res:Response,next:NextFunction) => {
+//   const search_string :any = req.query;
+//   console.log(search_string.split(" ").length);
+//   if (!obj_is_empty(course_cache)) {
+//     let search_result = [];
+//       for (let i in course_cache) {
+//         if (
+//           levensthein_ratio(
+//             (`${course_cache[i].course_identifier}${course_cache[i].course_number}`).toLowerCase(),
+//             (search_string.replace(/\s/g, "").toLowerCase())
+//           ) > 0.2
+//         ) {
+//           search_result.push({
+//             data: course_cache[i],
+//             distance: levensthein_ratio(
+//               `${course_cache[i].course_identifier}${course_cache[i].course_number.replace(/\s/g,"")}`,
+//               search_string
+//             ),
+//           });
+//         }
+//     }
+//        search_result.sort((first, second) =>
+//       first.distance < second.distance ? 1 : -1
+//     );
+//     res.status(200).send(search_result.slice(0, 10));
+//     } 
+//    else {
+//     res.status(500).send("not there");
+// }
+// });
 
 function get_all_department(obj) {
   let department_set = new Set();
@@ -200,5 +204,4 @@ function get_by_dpt_name(obj, dpt_name) {
   }
   return department;
 }
-
-module.exports = router;
+export = router;
