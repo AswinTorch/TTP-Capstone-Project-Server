@@ -88,7 +88,7 @@ router.get("/id/:id", async (req:Request,res:Response,next:NextFunction) => {
     }
   } else {
     console.log("Course Returned from the cache");
-    res.status(200).send(course_cache[id]);
+    res.status(200).send(course_cache[course_id]);
   }
 });
 // Deparment
