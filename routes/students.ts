@@ -13,7 +13,6 @@ const TIMER:number = 900000;
 let student_cache : object = {};
 //the cache_timer is used to keep track of the last http request by a specific student
 let CACHE_TIMER : object = {};
-
 /*
  * GET student object from their id
  * /api/students/:id
@@ -30,12 +29,10 @@ const router = express.Router();
 router.get("/:id", async (req:Request , res : Response) => {
   const id: any = req.params;
   const id_value: string = id.id;
-  const hashed_ip = crypto
+  const hashed_ip : string = crypto
     .SHA256(req.headers["x-real-ip"] || req.connection.remoteAddress)
     .toString();
-  console.log(typeof (hashed_ip));
-  let current_time = new Date();
-  console.log("print",typeof (current_time));
+  let current_time:object = new Date();
   if (obj_is_empty(student_cache)) {
     try {
       await db
@@ -97,11 +94,10 @@ router.get("/:id", async (req:Request , res : Response) => {
  */
 router.post("/", async (req:Request, res:Response) => {
   const { uid, firstName, lastName, email } = req.body;
-  console.log(req.body);
-  const hashed_ip = crypto
+  const hashed_ip:string = crypto
     .SHA256(req.headers["x-real-ip"] || req.connection.remoteAddress)
     .toString();
-  let newStudentObj = {
+  let newStudentObj :object= {
     uid: uid,
     first_name: firstName,
     last_name: lastName,
@@ -119,7 +115,7 @@ router.post("/", async (req:Request, res:Response) => {
       .set(newStudentObj)
       .then(() => {
         student_cache[uid] = newStudentObj;
-        const current_time = new Date();
+        const current_time :object = new Date();
         CACHE_TIMER[hashed_ip] = [uid, current_time];
         console.log(CACHE_TIMER);
         res.status(201).send(student_cache[uid]);
@@ -151,10 +147,10 @@ router.put("/:id/addcourse", async (req:Request , res:Response) => {
   const id: any = req.params;
   const id_value: string = id.id;
   let current_student = db.collection("Students").doc(id_value);
-  const hashed_ip = crypto
+  const hashed_ip :string = crypto
     .SHA256(req.headers["x-real-ip"] || req.connection.remoteAddress)
     .toString();
-  const current_time = new Date();
+  const current_time :object = new Date();
   try {
     await current_student
       .get()
@@ -206,13 +202,12 @@ router.put("/:id/addcourse", async (req:Request , res:Response) => {
  */
 router.put("/:id/removecourse", async (req :Request, res:Response) => {
   const id: any = req.params;
-  console.log(req.body);
   const id_value: string = id.id;
   let current_student = db.collection("Students").doc(id_value);
-  const hashed_ip = crypto
+  const hashed_ip:string = crypto
     .SHA256(req.headers["x-real-ip"] || req.connection.remoteAddress)
     .toString();
-  const current_time = new Date();
+  const current_time :object  = new Date();
   try {
     await current_student
       .get()
@@ -271,12 +266,12 @@ router.put("/:id/removecourse", async (req :Request, res:Response) => {
 router.put("/:id/swapcourses", async (req:Request, res:Response) => {
   const id:any = req.params;
   const id_value: string = id.id;
-  const prev_course = req.body[0];
+  const prev_course  = req.body[0];
   const new_course = req.body[1];
-  const hashed_ip = crypto
+  const hashed_ip :string = crypto
     .SHA256(req.headers["x-real-ip"] || req.connection.remoteAddress)
     .toString();
-  let current_time = new Date();
+  let current_time :object = new Date();
   let current_student = db.collection("Students").doc(id_value);
   try {
     await current_student
@@ -332,7 +327,7 @@ setInterval(function () {
   if (!obj_is_empty(CACHE_TIMER)) {
     const flushCache = async () => {
       return new Promise((res) => {        
-        const to_delete = [];
+        const to_delete :Array<any> = [];
         const time_now : any = new Date();
         for (let i in CACHE_TIMER) {
           if ((time_now - CACHE_TIMER[i][1]) >= TIMER) {
