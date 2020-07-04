@@ -1,18 +1,18 @@
-const express = require("express");
-const { obj_is_empty, get_array_without_value } = require("../utility/utils");
-const router = express.Router();
-const firebase = require("firebase");
-const db = require("./db");
-const crypto = require("crypto-js");
-console.log(db)
+import * as crypto from "crypto-js";
+import * as express from "express";
+import { Request, Response, NextFunction } from "express";
+import { Error } from "../app";
+import * as db from "./db";
+import { obj_is_empty, get_array_without_value } from "../utility/utils";
+import * as firebase from "firebase";
 
 
 //this is 15 mins in millisecond : this is to flush the cache
-const TIMER = 900000;
+const TIMER:number = 900000;
 // let TIMER = 10000;
-let student_cache = {};
+let student_cache : object = {};
 //the cache_timer is used to keep track of the last http request by a specific student
-let CACHE_TIMER = {};
+let CACHE_TIMER : object = {};
 
 /*
  * GET student object from their id
@@ -26,23 +26,25 @@ let CACHE_TIMER = {};
  * 200 - OK: student found on database
  * 404 - Not found: id does not exist on database
  */
-
-router.get("/:id", async (req, res) => {
-  console.log(db);
-  const { id } = req.params;
+const router = express.Router();
+router.get("/:id", async (req:Request , res : Response) => {
+  const id: any = req.params;
+  const id_value: string = id.id;
   const hashed_ip = crypto
     .SHA256(req.headers["x-real-ip"] || req.connection.remoteAddress)
     .toString();
+  console.log(typeof (hashed_ip));
   let current_time = new Date();
+  console.log("print",typeof (current_time));
   if (obj_is_empty(student_cache)) {
     try {
       await db
         .collection("Students")
-        .doc(id)
+        .doc(id_value)
         .get()
         .then((doc) => {
           if (!doc.exists)
-            res.status(404).send(`Student with id ${id} does not exist`);
+            res.status(404).send(`Student with id ${id_value} does not exist`);
           else {
             student_cache[doc.id] = doc.data();
             CACHE_TIMER[hashed_ip] = [doc.id, current_time];
@@ -56,15 +58,15 @@ router.get("/:id", async (req, res) => {
       console.error(err);
     }
   } else {
-    if (!(id in student_cache)) {
+    if (!(id_value in student_cache)) {
       res
         .status(404)
-        .send(`Student with id : ${id} does not exist in the cache`);
+        .send(`Student with id : ${id_value} does not exist in the cache`);
     } else {
       console.log("line 43::cached data was sent");
-      CACHE_TIMER[hashed_ip] = [id, current_time];
+      CACHE_TIMER[hashed_ip] = [id_value, current_time];
       console.log(CACHE_TIMER);
-      res.status(200).send(student_cache[id]);
+      res.status(200).send(student_cache[id_value]);
     }
   }
 });
@@ -93,8 +95,9 @@ router.get("/:id", async (req, res) => {
  * 400 - Bad Request: request body does not have enough information to create
  * a new student
  */
-router.post("/", async (req, res) => {
+router.post("/", async (req:Request, res:Response) => {
   const { uid, firstName, lastName, email } = req.body;
+  console.log(req.body);
   const hashed_ip = crypto
     .SHA256(req.headers["x-real-ip"] || req.connection.remoteAddress)
     .toString();
@@ -116,7 +119,8 @@ router.post("/", async (req, res) => {
       .set(newStudentObj)
       .then(() => {
         student_cache[uid] = newStudentObj;
-        CACHE_TIMER[hashed_ip] = [doc.id, current_time];
+        const current_time = new Date();
+        CACHE_TIMER[hashed_ip] = [uid, current_time];
         console.log(CACHE_TIMER);
         res.status(201).send(student_cache[uid]);
       })
@@ -143,9 +147,10 @@ router.post("/", async (req, res) => {
  * 400 - Bad Request: empty request body, cannot add new course
  * 404 - Not Found: user id does not exist on database
  */
-router.put("/:id/addcourse", async (req, res) => {
-  const { id } = req.params;
-  let current_student = db.collection("Students").doc(id);
+router.put("/:id/addcourse", async (req:Request , res:Response) => {
+  const id: any = req.params;
+  const id_value: string = id.id;
+  let current_student = db.collection("Students").doc(id_value);
   const hashed_ip = crypto
     .SHA256(req.headers["x-real-ip"] || req.connection.remoteAddress)
     .toString();
@@ -164,8 +169,8 @@ router.put("/:id/addcourse", async (req, res) => {
               date: new Date().toISOString(),
               package: req.body,
             };
-            student_cache[id].enrolled_courses.push(req.body);
-            student_cache[id].transaction_history.push(transaction);
+            student_cache[id_value].enrolled_courses.push(req.body);
+            student_cache[id_value].transaction_history.push(transaction);
             current_student.update({
               enrolled_courses: firebase.firestore.FieldValue.arrayUnion(
                 req.body
@@ -174,7 +179,7 @@ router.put("/:id/addcourse", async (req, res) => {
                 transaction
               ),
             });
-            CACHE_TIMER[hashed_ip] = [id, current_time];
+            CACHE_TIMER[hashed_ip] = [id_value, current_time];
             console.log(CACHE_TIMER);
             res.status(201).send({ course: req.body, transaction });
           } else res.status(400).send("Request body cannot be empty");
@@ -199,9 +204,11 @@ router.put("/:id/addcourse", async (req, res) => {
  * 400 - Bad Request: empty request body, cannot remove course
  * 404 - Not Found: user id does not exist on database
  */
-router.put("/:id/removecourse", async (req, res) => {
-  const { id } = req.params;
-  let current_student = db.collection("Students").doc(id);
+router.put("/:id/removecourse", async (req :Request, res:Response) => {
+  const id: any = req.params;
+  console.log(req.body);
+  const id_value: string = id.id;
+  let current_student = db.collection("Students").doc(id_value);
   const hashed_ip = crypto
     .SHA256(req.headers["x-real-ip"] || req.connection.remoteAddress)
     .toString();
@@ -222,11 +229,11 @@ router.put("/:id/removecourse", async (req, res) => {
             };
 
             let new_e_c = get_array_without_value(
-              student_cache[id].enrolled_courses,
+              student_cache[id_value].enrolled_courses,
               req.body
             );
-            student_cache[id].enrolled_courses = new_e_c;
-            student_cache[id].transaction_history.push(transaction);
+            student_cache[id_value].enrolled_courses = new_e_c;
+            student_cache[id_value].transaction_history.push(transaction);
             current_student.update({
               enrolled_courses: firebase.firestore.FieldValue.arrayRemove(
                 req.body
@@ -235,7 +242,7 @@ router.put("/:id/removecourse", async (req, res) => {
                 transaction
               ),
             });
-            CACHE_TIMER[hashed_ip] = [id, current_time];
+            CACHE_TIMER[hashed_ip] = [id_value, current_time];
             res.status(200).send({ course: req.body, transaction });
           } else res.status(400).send("Request body cannot be empty");
         } else res.status(404).send(`Student with id ${id} does not exist`);
@@ -261,15 +268,16 @@ router.put("/:id/removecourse", async (req, res) => {
  * 400 - Bad Request: invalid request body format
  * 404 - Not Found: user id does not exist on database
  */
-router.put("/:id/swapcourses", async (req, res) => {
-  const { id } = req.params;
+router.put("/:id/swapcourses", async (req:Request, res:Response) => {
+  const id:any = req.params;
+  const id_value: string = id.id;
   const prev_course = req.body[0];
   const new_course = req.body[1];
   const hashed_ip = crypto
     .SHA256(req.headers["x-real-ip"] || req.connection.remoteAddress)
     .toString();
   let current_time = new Date();
-  let current_student = db.collection("Students").doc(id);
+  let current_student = db.collection("Students").doc(id_value);
   try {
     await current_student
       .get()
@@ -285,12 +293,12 @@ router.put("/:id/swapcourses", async (req, res) => {
               package: req.body,
             };
             let cached_enrolled_course = get_array_without_value(
-              student_cache[id].enrolled_courses,
+              student_cache[id_value].enrolled_courses,
               prev_course
             );
-            student_cache[id].enrolled_courses = cached_enrolled_course;
-            student_cache[id].enrolled_courses.push(new_course);
-            student_cache[id].transaction_history.push(transaction);
+            student_cache[id_value].enrolled_courses = cached_enrolled_course;
+            student_cache[id_value].enrolled_courses.push(new_course);
+            student_cache[id_value].transaction_history.push(transaction);
             current_student.update({
               enrolled_courses: firebase.firestore.FieldValue.arrayRemove(
                 prev_course
@@ -304,7 +312,7 @@ router.put("/:id/swapcourses", async (req, res) => {
                 transaction
               ),
             });
-            CACHE_TIMER[hashed_ip] = [id, current_time];
+            CACHE_TIMER[hashed_ip] = [id_value, current_time];
             res.status(200).send({ courses: req.body, transaction });
           } else
             res
@@ -312,7 +320,7 @@ router.put("/:id/swapcourses", async (req, res) => {
               .send(
                 "Invalid request body: expecting an array that contains two JSON objects"
               );
-        } else res.status(404).send(`Student with id ${id} does not exist`);
+        } else res.status(404).send(`Student with id ${id_value} does not exist`);
       })
       .catch((err) => console.error(err));
   } catch (err) {
@@ -323,11 +331,11 @@ router.put("/:id/swapcourses", async (req, res) => {
 setInterval(function () {
   if (!obj_is_empty(CACHE_TIMER)) {
     const flushCache = async () => {
-      return new Promise((res) => {
-        const current_time = new Date();
+      return new Promise((res) => {        
         const to_delete = [];
+        const time_now : any = new Date();
         for (let i in CACHE_TIMER) {
-          if (current_time - CACHE_TIMER[i][1] >= TIMER) {
+          if ((time_now - CACHE_TIMER[i][1]) >= TIMER) {
             console.log(`Deleting ${CACHE_TIMER[i][0]} from the cache`);
             delete student_cache[CACHE_TIMER[i][0]];
             to_delete.push(i);
@@ -346,4 +354,4 @@ setInterval(function () {
   }
 }, 10000);
 
-module.exports = router;
+export = router;
