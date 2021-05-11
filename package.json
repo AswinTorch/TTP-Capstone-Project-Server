@@ -20,7 +20,7 @@
     "firebase-functions": "^0.7.0",
     "helmet": "^3.23.0",
     "http-errors": "~1.6.3",
-    "lodash": "^4.17.15",
+    "lodash": "^4.17.21",
     "morgan": "~1.9.1",
     "redis": "^3.0.2",
     "typescript": "^3.9.5"
