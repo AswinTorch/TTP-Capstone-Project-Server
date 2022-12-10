@@ -14,7 +14,7 @@
     "crypto-js": "^4.0.0",
     "debug": "~2.6.9",
     "dotenv": "^8.2.0",
-    "express": "~4.16.1",
+    "express": "~4.17.3",
     "firebase": "^7.15.1",
     "firebase-admin": "^5.4.1",
     "firebase-functions": "^0.7.0",
